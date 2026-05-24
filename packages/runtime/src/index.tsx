@@ -113,9 +113,26 @@ export interface ReactLogProviderProps {
   queueLimit?: number;
 }
 
+/**
+ * Built-in adapter presets for the high-level React Log Agent wrapper.
+ */
+export type ReactLogAgentAdapterPreset = "web" | "mobile";
+
+/**
+ * Props for the high-level React Log Agent wrapper with production-ready
+ * defaults for common web and mobile integrations.
+ */
+export interface ReactLogAgentProps
+  extends Omit<ReactLogProviderProps, "adapters" | "redact"> {
+  adapters?: ReactLogAgentAdapterPreset | readonly AdapterFactory[];
+  redact?: readonly string[];
+  navigationRef?: unknown;
+}
+
 const DEFAULT_PORT = 3799;
 const DEFAULT_HOST = "localhost";
 const DEFAULT_SDK_VERSION = "0.0.0";
+const DEFAULT_REDACT_RULES = ["authorization", "cookie", "password", "token"] as const;
 
 const disabledState: ReactLogAgentState = {
   enabled: false,
@@ -129,6 +146,43 @@ const ReactLogAgentContext = createContext<ReactLogAgentState>(disabledState);
  */
 export function useReactLogAgent(): ReactLogAgentState {
   return useContext(ReactLogAgentContext);
+}
+
+/**
+ * High-level runtime wrapper for one-minute setup. It keeps the underlying
+ * provider opt-in while supplying common adapter and redaction defaults.
+ */
+export function ReactLogAgent({
+  adapters = "web",
+  redact = DEFAULT_REDACT_RULES,
+  navigationRef,
+  ...providerProps
+}: ReactLogAgentProps) {
+  const resolvedAdapters = useMemo<readonly AdapterFactory[]>(() => {
+    if (Array.isArray(adapters)) {
+      return adapters;
+    }
+
+    if (adapters === "mobile") {
+      const mobileAdapters: AdapterFactory[] = [createReactNativeFetchAdapter()];
+
+      if (navigationRef) {
+        mobileAdapters.push(createReactNavigationAdapter(navigationRef));
+      }
+
+      return mobileAdapters;
+    }
+
+    return [createFetchAdapter(), createRouterAdapter()];
+  }, [adapters, navigationRef]);
+
+  return (
+    <ReactLogProvider
+      {...providerProps}
+      adapters={resolvedAdapters}
+      redact={redact}
+    />
+  );
 }
 
 /**

@@ -690,7 +690,7 @@ function truncate(value: string, maxLength: number): string {
 }
 
 function printUsage(): void {
-  writeLine(`Usage: react-log-agent start [options]
+  writeLine(`Usage: react-log-agent [start] [options]
 
 Options:
   --port <number>                 WebSocket port (default: ${DEFAULT_PORT})

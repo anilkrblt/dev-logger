@@ -1,19 +1,25 @@
 {
   "name": "react-example",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.0",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/protocol",
+    "packages/runtime",
+    "packages/cli",
+    "packages/sandbox"
   ],
   "scripts": {
     "dev": "vite --port=9090 --host=0.0.0.0",
+    "dev:sandbox": "npm run dev --workspace @anilkrblt/sandbox",
     "build": "npm run build:packages && npm run build:app",
     "build:app": "vite build",
+    "build:sandbox": "npm run build --workspace @anilkrblt/sandbox",
     "build:packages": "node scripts/build-packages.mjs",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
+    "typecheck:sandbox": "npm run typecheck --workspace @anilkrblt/sandbox",
     "typecheck:packages": "npm run typecheck --workspaces --if-present"
   },
   "dependencies": {

@@ -238,6 +238,10 @@ function redactRecursive(
   rules: readonly string[],
   seen: WeakSet<object>,
 ): unknown {
+  if (typeof value === "string") {
+    return redactStringifiedJson(value, rules, seen);
+  }
+
   if (value === null || typeof value !== "object") {
     return value;
   }
@@ -265,6 +269,29 @@ function redactRecursive(
   }
 
   return output;
+}
+
+function redactStringifiedJson(
+  value: string,
+  rules: readonly string[],
+  seen: WeakSet<object>,
+): string {
+  const trimmed = value.trim();
+  const looksLikeJson =
+    (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith("]"));
+
+  if (!looksLikeJson) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    const serialized = JSON.stringify(redactRecursive(parsed, rules, seen));
+    return serialized ?? value;
+  } catch {
+    return value;
+  }
 }
 
 function normalizeRedactRules(rules: readonly string[] = []): string[] {

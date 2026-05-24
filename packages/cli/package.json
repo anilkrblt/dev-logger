@@ -1,6 +1,6 @@
 {
   "name": "@anilkrblt/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Terminal CLI agent for React Log Agent.",
   "type": "module",
   "license": "MIT",

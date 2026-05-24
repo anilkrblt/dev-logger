@@ -57,3 +57,20 @@
 - [x] Add mobile LAN IP host note for devices and emulators.
 - [x] Refresh feature, adapter, package, and local development sections for v0.1.0.
 - [x] Verify README examples and CLI invocation.
+
+# Phase 7.5 - Local Runtime Integration Sandbox
+
+- [x] Add private Vite React sandbox workspace.
+- [x] Link local runtime through npm workspace dependency.
+- [x] Add Vite source alias for real-time runtime debugging.
+- [x] Add fetch, sensitive payload, failed fetch, and route smoke UI.
+- [x] Add root sandbox scripts.
+- [x] Verify install, typecheck, build, and dev startup.
+
+# Phase 8 - Premium DX Wrapper and Deep Redaction
+
+- [x] Add `ReactLogAgent` wrapper with web and mobile adapter presets.
+- [x] Patch centralized redaction for nested stringified JSON payloads.
+- [x] Modernize CLI implicit-start help and docs.
+- [x] Update README Quick Start to the premium wrapper API.
+- [x] Verify package typecheck, package build, and sandbox build.
