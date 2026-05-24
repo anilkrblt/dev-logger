@@ -17,7 +17,7 @@ import type {
   LogEvent,
   RouteTransitionEvent,
   ServerAckPayload,
-} from "@react-log-agent/protocol";
+} from "@anilkrblt/protocol";
 
 const DEFAULT_PORT = 3799;
 const DEFAULT_PROFILE: CaptureProfile = "all";
@@ -200,9 +200,10 @@ function parseArgs(argv: string[]): ParsedArgs {
   let profile: CaptureProfile = DEFAULT_PROFILE;
   const filterPatterns: string[] = [];
   const redactRules: string[] = [];
+  const args = argv[0] === "start" ? argv.slice(1) : argv;
 
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
 
     if (arg === "--help" || arg === "-h") {
       return {
@@ -213,7 +214,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
 
     if (arg === "--port") {
-      const value = argv[index + 1];
+      const value = args[index + 1];
       if (!value) {
         return { ok: false, error: "--port requires a numeric value." };
       }
@@ -227,7 +228,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
 
     if (arg === "--profile") {
-      const value = argv[index + 1];
+      const value = args[index + 1];
       if (!value) {
         return { ok: false, error: "--profile requires a value." };
       }
@@ -243,7 +244,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
 
     if (arg === "--filter") {
-      const value = argv[index + 1];
+      const value = args[index + 1];
       if (!value) {
         return { ok: false, error: "--filter requires a pattern string." };
       }
@@ -253,7 +254,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
 
     if (arg === "--redact") {
-      const value = argv[index + 1];
+      const value = args[index + 1];
       if (!value) {
         return { ok: false, error: "--redact requires a comma-separated string." };
       }
@@ -689,7 +690,7 @@ function truncate(value: string, maxLength: number): string {
 }
 
 function printUsage(): void {
-  writeLine(`Usage: react-log-agent [options]
+  writeLine(`Usage: react-log-agent start [options]
 
 Options:
   --port <number>                 WebSocket port (default: ${DEFAULT_PORT})

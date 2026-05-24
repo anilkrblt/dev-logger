@@ -10,38 +10,56 @@ import type { AdapterFactory, AdapterInstallContext } from "../index";
 
 const DEFAULT_MAX_BODY_LENGTH = 64_000;
 
-let activeFetchCleanup: (() => void) | undefined;
+let activeMobileFetchCleanup: (() => void) | undefined;
+
+interface ReactNativeGlobal {
+  fetch?: typeof fetch;
+  navigator?: {
+    product?: string;
+  };
+  nativeCallSyncHook?: unknown;
+  HermesInternal?: unknown;
+}
 
 /**
- * Options for the built-in global fetch adapter.
+ * Options for React Native global fetch instrumentation.
  */
-export interface FetchAdapterOptions {
+export interface ReactNativeFetchAdapterOptions {
   maxBodyLength?: number;
 }
 
 /**
- * Creates the built-in adapter that instruments global window.fetch.
+ * Creates an adapter that instruments React Native global.fetch.
  */
-export function createFetchAdapter(options: FetchAdapterOptions = {}): AdapterFactory {
+export function createReactNativeFetchAdapter(
+  options: ReactNativeFetchAdapterOptions = {},
+): AdapterFactory {
   return {
-    name: "fetch",
+    name: "react-native-fetch",
     profiles: ["network", "errors", "all"],
     install(context) {
-      if (activeFetchCleanup || typeof window === "undefined" || typeof window.fetch !== "function") {
+      const runtime = globalThis as typeof globalThis & ReactNativeGlobal;
+
+      if (
+        activeMobileFetchCleanup ||
+        !isReactNativeRuntime(runtime) ||
+        typeof runtime.fetch !== "function"
+      ) {
         return () => undefined;
       }
 
       const maxBodyLength = options.maxBodyLength ?? DEFAULT_MAX_BODY_LENGTH;
-      const originalFetch = window.fetch.bind(window);
+      const originalFetch = runtime.fetch;
+      const callOriginalFetch = originalFetch.bind(runtime);
 
-      window.fetch = async function reactLogAgentFetch(
+      runtime.fetch = async function reactLogAgentReactNativeFetch(
         input: RequestInfo | URL,
         init?: RequestInit,
       ): Promise<Response> {
         const url = resolveRequestUrl(input);
 
         if (!matchesFilterPatterns(url, context.filterPatterns)) {
-          return originalFetch(input, init);
+          return callOriginalFetch(input, init);
         }
 
         const requestId = createRuntimeId("request");
@@ -65,7 +83,7 @@ export function createFetchAdapter(options: FetchAdapterOptions = {}): AdapterFa
         }
 
         try {
-          const response = await originalFetch(input, init);
+          const response = await callOriginalFetch(input, init);
           const latency = getLatency(startedAt);
 
           if (shouldEmitResponse(context.activeProfile, response.status)) {
@@ -101,12 +119,12 @@ export function createFetchAdapter(options: FetchAdapterOptions = {}): AdapterFa
         }
       };
 
-      activeFetchCleanup = () => {
-        window.fetch = originalFetch;
-        activeFetchCleanup = undefined;
+      activeMobileFetchCleanup = () => {
+        runtime.fetch = originalFetch;
+        activeMobileFetchCleanup = undefined;
       };
 
-      return activeFetchCleanup;
+      return activeMobileFetchCleanup;
     },
   };
 }
@@ -133,7 +151,7 @@ function emitResponseEvent({
     type: "HTTP_RESPONSE",
     source: "fetch",
     status: response.status,
-    headers: headersToObject(response.headers),
+    headers: normalizeHeaders(response.headers),
     latency,
     requestId,
     currentRouteContext: context.getCurrentRouteContext(),
@@ -149,6 +167,14 @@ function emitResponseEvent({
     .catch(() => {
       context.emit(baseEvent);
     });
+}
+
+function isReactNativeRuntime(runtime: ReactNativeGlobal): boolean {
+  return (
+    runtime.navigator?.product === "ReactNative" ||
+    runtime.nativeCallSyncHook !== undefined ||
+    runtime.HermesInternal !== undefined
+  );
 }
 
 function shouldEmitRequest(profile: string): boolean {
@@ -168,34 +194,23 @@ function shouldEmitError(profile: string): boolean {
 }
 
 function resolveRequestUrl(input: RequestInfo | URL): string {
-  if (typeof Request !== "undefined" && input instanceof Request) {
+  if (isRequestLike(input) && typeof input.url === "string") {
     return input.url;
   }
 
-  return input.toString();
+  return String(input);
 }
 
 function resolveRequestMethod(input: RequestInfo | URL, init?: RequestInit): string {
-  const method =
-    init?.method ??
-    (typeof Request !== "undefined" && input instanceof Request ? input.method : undefined) ??
-    "GET";
-
+  const method = init?.method ?? (isRequestLike(input) ? input.method : undefined) ?? "GET";
   return method.toUpperCase();
 }
 
 function resolveRequestHeaders(input: RequestInfo | URL, init?: RequestInit): HeaderMap {
-  const headers = new Headers(
-    typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
-  );
-
-  if (init?.headers) {
-    new Headers(init.headers).forEach((value, key) => {
-      headers.set(key, value);
-    });
-  }
-
-  return headersToObject(headers);
+  return normalizeMergedHeaders([
+    isRequestLike(input) ? input.headers : undefined,
+    init?.headers,
+  ]);
 }
 
 function resolveRequestBody(
@@ -207,21 +222,61 @@ function resolveRequestBody(
     return serializeBody(init.body, maxBodyLength);
   }
 
-  if (typeof Request !== "undefined" && input instanceof Request) {
+  if (isRequestLike(input)) {
     return "[Request body unavailable without consuming stream]";
   }
 
   return undefined;
 }
 
-function headersToObject(headers: Headers): HeaderMap {
+function normalizeMergedHeaders(sources: readonly unknown[]): HeaderMap {
   const result: HeaderMap = {};
 
-  headers.forEach((value, key) => {
-    result[key] = value;
-  });
+  for (const source of sources) {
+    mergeHeaders(result, source);
+  }
 
   return result;
+}
+
+function normalizeHeaders(headers: unknown): HeaderMap {
+  const result: HeaderMap = {};
+  mergeHeaders(result, headers);
+  return result;
+}
+
+function mergeHeaders(result: HeaderMap, source: unknown): void {
+    if (!source) {
+    return;
+    }
+
+    if (isHeadersLike(source)) {
+      source.forEach((value, key) => {
+        result[key] = value;
+      });
+    return;
+    }
+
+    if (Array.isArray(source)) {
+      for (const entry of source) {
+        if (Array.isArray(entry) && entry.length >= 2) {
+          result[String(entry[0])] = String(entry[1]);
+        }
+      }
+    return;
+    }
+
+    if (isRecord(source)) {
+      for (const [key, value] of Object.entries(source)) {
+        if (value === undefined || value === null) {
+          continue;
+        }
+
+        result[key] = Array.isArray(value)
+          ? value.map(String).join(", ")
+          : String(value);
+      }
+    }
 }
 
 function serializeBody(body: BodyInit, maxBodyLength: number): SerializablePayload {
@@ -229,7 +284,7 @@ function serializeBody(body: BodyInit, maxBodyLength: number): SerializablePaylo
     return serializeStringBody(body, maxBodyLength);
   }
 
-  if (body instanceof URLSearchParams) {
+  if (typeof URLSearchParams !== "undefined" && body instanceof URLSearchParams) {
     return truncateText(body.toString(), maxBodyLength);
   }
 
@@ -251,6 +306,10 @@ function serializeBody(body: BodyInit, maxBodyLength: number): SerializablePaylo
 
   if (ArrayBuffer.isView(body)) {
     return `[${body.constructor.name} byteLength=${body.byteLength}]`;
+  }
+
+  if (isRecord(body)) {
+    return body;
   }
 
   return "[Unsupported request body]";
@@ -281,26 +340,54 @@ async function readResponseBody(
   response: Response,
   maxBodyLength: number,
 ): Promise<SerializablePayload | undefined> {
-  const contentLengthHeader = response.headers.get("content-length");
+  const contentLengthHeader = getHeaderValue(response.headers, "content-length");
   const contentLength = contentLengthHeader ? Number.parseInt(contentLengthHeader, 10) : undefined;
 
   if (contentLength !== undefined && Number.isFinite(contentLength) && contentLength > maxBodyLength) {
     return `[Response body skipped: content-length=${contentLength}]`;
   }
 
-  const contentType = response.headers.get("content-type") ?? "";
+  if (typeof response.clone !== "function" || typeof response.text !== "function") {
+    return undefined;
+  }
+
+  const contentType = getHeaderValue(response.headers, "content-type") ?? "";
   const text = await response.clone().text();
   const truncatedText = truncateText(text, maxBodyLength);
 
   if (contentType.includes("application/json")) {
     try {
-      return JSON.parse(truncatedText);
+      return JSON.parse(truncatedText) as SerializablePayload;
     } catch {
       return truncatedText;
     }
   }
 
   return truncatedText;
+}
+
+function getHeaderValue(headers: unknown, key: string): string | undefined {
+  if (isHeadersLike(headers) && typeof headers.get === "function") {
+    return headers.get(key) ?? undefined;
+  }
+
+  if (!isRecord(headers)) {
+    return undefined;
+  }
+
+  const exactValue = headers[key];
+  if (exactValue !== undefined && exactValue !== null) {
+    return String(exactValue);
+  }
+
+  const normalizedKey = key.toLowerCase();
+  for (const [headerKey, value] of Object.entries(headers)) {
+    if (headerKey.toLowerCase() === normalizedKey && value !== undefined && value !== null) {
+      return String(value);
+    }
+  }
+
+  return undefined;
 }
 
 function describeBlob(blob: Blob): string {
@@ -310,7 +397,7 @@ function describeBlob(blob: Blob): string {
   return `[Blob${name}${type} size=${blob.size}]`;
 }
 
-function matchesFilterPatterns(url: string, patterns: readonly string[]): boolean {
+function matchesFilterPatterns(value: string, patterns: readonly string[]): boolean {
   if (patterns.length === 0) {
     return true;
   }
@@ -321,10 +408,10 @@ function matchesFilterPatterns(url: string, patterns: readonly string[]): boolea
     }
 
     if (!pattern.includes("*")) {
-      return url.includes(pattern);
+      return value.includes(pattern);
     }
 
-    return wildcardToRegExp(pattern).test(url);
+    return wildcardToRegExp(pattern).test(value);
   });
 }
 
@@ -367,6 +454,21 @@ function truncateText(value: string, maxLength: number): string {
   }
 
   return `${value.slice(0, maxLength)}...[truncated ${value.length - maxLength} chars]`;
+}
+
+function isRequestLike(value: unknown): value is Request {
+  return isRecord(value) && typeof value.url === "string";
+}
+
+function isHeadersLike(value: unknown): value is Headers {
+  return (
+    isRecord(value) &&
+    typeof value.forEach === "function"
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, any> {
+  return typeof value === "object" && value !== null;
 }
 
 function getNow(): number {

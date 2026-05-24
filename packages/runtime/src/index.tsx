@@ -15,11 +15,13 @@ import type {
   CurrentRouteContext,
   LogEvent,
   ServerAckPayload,
-} from "@react-log-agent/protocol";
+} from "@anilkrblt/protocol";
 
 import { createFetchAdapter } from "./adapters/fetch";
 import { createAxiosAdapter } from "./adapters/axios";
 import { createRouterAdapter } from "./adapters/router";
+import { createReactNativeFetchAdapter } from "./adapters/mobileFetch";
+import { createReactNavigationAdapter } from "./adapters/reactNavigation";
 import {
   createWebSocketTransport,
   type RuntimeConnectionStatus,
@@ -42,10 +44,17 @@ export type {
   LogSource,
   RouteTransitionEvent,
   ServerAckPayload,
-} from "@react-log-agent/protocol";
+} from "@anilkrblt/protocol";
 
-export { createAxiosAdapter, createFetchAdapter, createRouterAdapter };
+export {
+  createAxiosAdapter,
+  createFetchAdapter,
+  createReactNativeFetchAdapter,
+  createReactNavigationAdapter,
+  createRouterAdapter,
+};
 export type { RuntimeConnectionStatus, WebSocketTransport };
+export type { ReactNativeFetchAdapterOptions } from "./adapters/mobileFetch";
 
 /**
  * Cleanup function returned by an installed runtime adapter.
@@ -139,7 +148,7 @@ export function ReactLogProvider({
 }: ReactLogProviderProps) {
   const [state, setState] = useState<ReactLogAgentState>(() => ({
     enabled,
-    status: enabled && canUseBrowserRuntime() ? "connecting" : "disabled",
+    status: enabled && canUseRuntime() ? "connecting" : "disabled",
   }));
 
   const adapterNames = useMemo(
@@ -152,7 +161,7 @@ export function ReactLogProvider({
   );
 
   useEffect(() => {
-    if (!enabled || !canUseBrowserRuntime()) {
+    if (!enabled || !canUseRuntime()) {
       uninstallAdapters(installedAdaptersRef.current);
       setState(disabledState);
       return;
@@ -331,8 +340,8 @@ function readBrowserRouteContext(): CurrentRouteContext | undefined {
   };
 }
 
-function canUseBrowserRuntime(): boolean {
-  return typeof window !== "undefined" && typeof WebSocket !== "undefined";
+function canUseRuntime(): boolean {
+  return typeof globalThis.WebSocket === "function";
 }
 
 function createRuntimeId(prefix: string): string {

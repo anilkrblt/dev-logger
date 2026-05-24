@@ -3,7 +3,9 @@ import type {
   CurrentRouteContext,
   LogEvent,
   ServerAckPayload,
-} from "@react-log-agent/protocol";
+} from "@anilkrblt/protocol";
+
+import { scheduleQueueFlush } from "./queue";
 
 export type RuntimeConnectionStatus =
   | "disabled"
@@ -166,8 +168,7 @@ export function createWebSocketTransport(
 
     isFlushScheduled = true;
 
-    const flushWhenIdle = getIdleScheduler();
-    flushWhenIdle(() => {
+    scheduleQueueFlush(() => {
       isFlushScheduled = false;
       flush();
     });
@@ -326,24 +327,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isCaptureProfile(value: unknown): value is ServerAckPayload["activeProfile"] {
   return value === "network" || value === "routes" || value === "errors" || value === "all";
-}
-
-function getIdleScheduler(): (callback: () => void) => void {
-  const idleWindow = typeof window === "undefined"
-    ? undefined
-    : window as Window & {
-        requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-      };
-
-  if (idleWindow?.requestIdleCallback) {
-    return (callback) => {
-      idleWindow.requestIdleCallback?.(callback, { timeout: 250 });
-    };
-  }
-
-  return (callback) => {
-    queueMicrotask(callback);
-  };
 }
 
 function createNoopTransport(status: RuntimeConnectionStatus): WebSocketTransport {

@@ -1,6 +1,6 @@
 {
-  "name": "@react-log-agent/protocol",
-  "version": "0.0.0",
+  "name": "@anilkrblt/protocol",
+  "version": "0.1.0",
   "description": "Shared protocol types for React Log Agent runtime and CLI packages.",
   "type": "module",
   "license": "MIT",

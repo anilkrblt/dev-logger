@@ -1,4 +1,4 @@
-import type { CurrentRouteContext, RouteTransitionEvent } from "@react-log-agent/protocol";
+import type { CurrentRouteContext, RouteTransitionEvent } from "@anilkrblt/protocol";
 
 import type { AdapterFactory, AdapterInstallContext } from "../index";
 

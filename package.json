@@ -17,8 +17,8 @@
     "typecheck:packages": "npm run typecheck --workspaces --if-present"
   },
   "dependencies": {
-    "@react-log-agent/protocol": "0.0.0",
-    "@react-log-agent/runtime": "0.0.0",
+    "@anilkrblt/protocol": "0.1.0",
+    "@anilkrblt/runtime": "0.1.0",
     "@base-ui/react": "^1.4.1",
     "@fontsource-variable/geist": "^5.2.8",
     "@google/genai": "^1.29.0",
@@ -44,7 +44,7 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
-    "@react-log-agent/cli": "0.0.0",
+    "@anilkrblt/cli": "0.1.0",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "@types/react": "^19.0.0",

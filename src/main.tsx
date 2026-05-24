@@ -7,7 +7,7 @@ import {
   createAxiosAdapter,
   createFetchAdapter,
   createRouterAdapter,
-} from '@react-log-agent/runtime';
+} from '@anilkrblt/runtime';
 import App from './App.tsx';
 import { axiosClient } from './lib/httpClient';
 import './index.css';

@@ -1,6 +1,6 @@
 {
-  "name": "@react-log-agent/runtime",
-  "version": "0.0.0",
+  "name": "@anilkrblt/runtime",
+  "version": "0.1.0",
   "description": "Browser runtime SDK for React Log Agent.",
   "type": "module",
   "license": "MIT",
@@ -49,7 +49,7 @@
     "prepublishOnly": "npm run typecheck && npm run build"
   },
   "dependencies": {
-    "@react-log-agent/protocol": "0.0.0"
+    "@anilkrblt/protocol": "0.1.0"
   },
   "peerDependencies": {
     "react": ">=18"

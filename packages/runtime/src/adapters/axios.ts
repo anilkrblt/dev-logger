@@ -4,7 +4,7 @@ import type {
   HttpRequestEvent,
   HttpResponseEvent,
   SerializablePayload,
-} from "@react-log-agent/protocol";
+} from "@anilkrblt/protocol";
 
 import type { AdapterFactory, AdapterInstallContext } from "../index";
 

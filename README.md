@@ -1,102 +1,101 @@
-# ⚡ React Log Agent
+# React Log Agent
 
+[![Version](https://img.shields.io/badge/version-0.1.0-111827)](./packages/runtime/package.json)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18%2B-61dafb?logo=react&logoColor=111)](https://react.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-Hermes%20%2F%20JSC-61dafb?logo=react&logoColor=111)](https://reactnative.dev/)
 [![Node](https://img.shields.io/badge/Node-%3E%3D18-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/license-MIT-green)](./packages/runtime/package.json)
 [![Monorepo](https://img.shields.io/badge/npm-workspaces-cb3837?logo=npm&logoColor=white)](https://docs.npmjs.com/cli/using-npm/workspaces)
 
-A performance-first, opt-in developer telemetry tool for React applications. Capture route transitions, global fetches, and Axios calls directly into your terminal dashboard with zero overhead when disconnected.
+React Log Agent is a performance-first, opt-in developer telemetry tool for React and React Native applications. Capture browser fetches, React Native fetches, Axios calls, route transitions, and React Navigation screen changes directly into one local terminal dashboard with zero overhead when disconnected.
 
-React Log Agent is built for local development: the browser runtime stays inert until your CLI bridge acknowledges the session, then installs only the adapters requested by the active capture profile.
-
-## Why It Exists
-
-Modern React apps hide the story of a user flow across routers, network clients, async boundaries, and browser APIs. React Log Agent pulls that story into a local terminal stream without leaving instrumentation permanently hot inside your app.
-
-- Inspect fetch and Axios traffic as it happens.
-- Correlate network activity with the active route.
-- Redact sensitive data in the browser before anything crosses the wire.
-- Turn everything off by closing the CLI or setting `enabled={false}`.
+Version `0.1.0` introduces cross-platform runtime support: the same `@anilkrblt/runtime` package now works in browser environments and React Native Hermes/JSC runtimes while streaming to the same `@anilkrblt/cli` terminal agent.
 
 ## Architecture
 
 ```text
-React App (Runtime SDK)
-  ReactLogProvider
-  fetch / axios / router adapters
-  browser-side redaction + route context
-        |
-        |  ws://localhost:3799
-        |  CLIENT_HELLO -> SERVER_ACK
-        v
-Local Server (CLI Agent)
-  capture profile + filters + remote redaction rules
-        |
-        v
-Terminal Dashboard
-  HTTP_REQUEST / HTTP_RESPONSE / HTTP_ERROR / ROUTE_TRANSITION
+                         @anilkrblt/runtime
+
+        Browser / Web                                  Mobile / React Native
+  React + Vite / Next / CRA                      Hermes / JSC + React Navigation
+  createFetchAdapter()                           createReactNativeFetchAdapter()
+  createAxiosAdapter()                           createReactNavigationAdapter()
+  createRouterAdapter()                          active screen context
+  active route context
+          |                                                |
+          +-------------------- WebSocket -----------------+
+                               ws://<host>:3799
+                               CLIENT_HELLO
+                               SERVER_ACK
+                                     |
+                                     v
+                            @anilkrblt/cli
+                       local terminal dashboard
+
+           HTTP_REQUEST / HTTP_RESPONSE / HTTP_ERROR / ROUTE_TRANSITION
 ```
 
-### Inert-by-Default Lifecycle
+The runtime is inert by default. When `enabled={false}`, no socket is opened, no adapter is installed, and no browser or mobile global is patched. When enabled, the runtime connects to the CLI, waits for `SERVER_ACK`, then installs only the adapters requested by the active capture profile.
 
-React Log Agent does no work unless you explicitly enable it.
-
-1. `enabled={false}`: no WebSocket, no adapters, no patched browser APIs.
-2. `enabled={true}`: the runtime opens a WebSocket to `ws://localhost:3799` by default.
-3. The runtime sends `CLIENT_HELLO` with the app name, SDK version, and available adapters.
-4. The CLI replies with `SERVER_ACK`, including the active profile, filters, and remote redaction rules.
-5. Only then does the runtime install matching adapters.
-6. If the socket closes, every adapter is uninstalled and patched APIs such as `window.fetch` are restored.
+If the WebSocket closes, every installed adapter is cleaned up immediately. Browser `window.fetch` and mobile `globalThis.fetch` are restored to their original implementations.
 
 ## Packages
 
-This repository is an npm workspace monorepo.
+| Package | Version | Purpose |
+| --- | --- | --- |
+| `@anilkrblt/protocol` | `0.1.0` | Shared event and handshake contracts. |
+| `@anilkrblt/runtime` | `0.1.0` | Cross-platform React runtime, transport, provider, and adapters. |
+| `@anilkrblt/cli` | `0.1.0` | Local WebSocket server and terminal dashboard. |
 
-| Package | Purpose |
-| --- | --- |
-| `@react-log-agent/protocol` | Shared TypeScript event and handshake contracts. |
-| `@react-log-agent/runtime` | Browser-side React SDK, provider, transport, and adapters. |
-| `@react-log-agent/cli` | Local WebSocket server and terminal dashboard. |
-
-The root app is private. Individual packages are configured as publishable packages with dual ESM/CJS builds.
+The repository is an npm workspace monorepo. The root app is private; packages are built as dual ESM/CJS libraries.
 
 ## Installation
 
-Install the runtime in your React app:
+The packages are scoped under `@anilkrblt`. If they are published as private npm packages, authenticate with npm before installing:
 
 ```bash
-npm install @react-log-agent/runtime
+npm login
 ```
 
-Run the local CLI bridge when you want telemetry:
+Install the runtime in your app:
 
 ```bash
-npx @react-log-agent/cli -- --profile all
+npm install @anilkrblt/runtime@0.1.0
+```
+
+Start the terminal agent:
+
+```bash
+npx @anilkrblt/cli start
+```
+
+Run with a fixed version and capture profile:
+
+```bash
+npx @anilkrblt/cli@0.1.0 start --profile all
 ```
 
 Useful CLI flags:
 
 ```bash
-npx @react-log-agent/cli -- --port 3799 --profile network
-npx @react-log-agent/cli -- --profile errors --filter api.example.com
-npx @react-log-agent/cli -- --redact api-key,secret,session
+npx @anilkrblt/cli start --port 3799 --profile network
+npx @anilkrblt/cli start --profile routes
+npx @anilkrblt/cli start --profile errors --filter api.example.com
+npx @anilkrblt/cli start --redact api-key,secret,session
 ```
 
 Profiles:
 
 | Profile | Captures |
 | --- | --- |
-| `all` | Routes, network requests, responses, and errors. |
+| `all` | Routes, screen changes, network requests, responses, and errors. |
 | `network` | Fetch/Axios requests, responses, and rejected calls. |
-| `routes` | Route transitions only. |
+| `routes` | Route transitions and React Navigation screen transitions. |
 | `errors` | Rejected network calls and HTTP responses with status `>= 400`. |
 
-## Integration
+## Quick Start: Web (React/Vite)
 
-### Basic Fetch Instrumentation
-
-Add the provider near the root of your React app. Keep adapter arrays stable by defining them outside render.
+Use the web adapters in browser React apps. Keep adapter arrays stable by defining them outside render.
 
 ```tsx
 // src/main.tsx
@@ -105,12 +104,22 @@ import ReactDOM from "react-dom/client";
 import {
   ReactLogProvider,
   createFetchAdapter,
-} from "@react-log-agent/runtime";
+  createRouterAdapter,
+} from "@anilkrblt/runtime";
 
 import App from "./App";
 
-const logAdapters = [createFetchAdapter()];
-const redactRules = ["authorization", "cookie", "password", "token"];
+const logAdapters = [
+  createRouterAdapter(),
+  createFetchAdapter(),
+];
+
+const redactRules = [
+  "authorization",
+  "cookie",
+  "password",
+  "token",
+];
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -118,7 +127,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       enabled={import.meta.env.DEV}
       adapters={logAdapters}
       redact={redactRules}
-      appName="My React App"
+      appName="Web Dashboard"
+      host="localhost"
+      port={3799}
     >
       <App />
     </ReactLogProvider>
@@ -126,34 +137,39 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 );
 ```
 
-The fetch adapter patches `window.fetch` only after `SERVER_ACK`. On disconnect or provider cleanup, the original `window.fetch` is restored.
-
-### Axios and Router Correlation
-
-React Log Agent also supports Axios interceptors and route tracking. Network events automatically inherit the current route context.
+`createFetchAdapter()` instruments global `window.fetch` only after the CLI acknowledges the session. `createRouterAdapter()` tracks browser History API changes by default and can also receive React Router data-router or history-like objects.
 
 ```tsx
-// src/main.tsx
+// src/main.tsx with a React Router data router
 import React from "react";
 import ReactDOM from "react-dom/client";
-import axios from "axios";
+import {
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 import {
   ReactLogProvider,
-  createAxiosAdapter,
   createFetchAdapter,
   createRouterAdapter,
-} from "@react-log-agent/runtime";
+} from "@anilkrblt/runtime";
 
 import App from "./App";
+import Settings from "./Settings";
 
-const axiosInstance = axios.create({
-  baseURL: "https://api.example.com",
-});
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
+  },
+]);
 
 const logAdapters = [
-  createRouterAdapter(),
+  createRouterAdapter({ router }),
   createFetchAdapter(),
-  createAxiosAdapter(axiosInstance),
 ];
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -162,38 +178,229 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       enabled={import.meta.env.DEV}
       adapters={logAdapters}
       redact={["authorization", "cookie", "password", "token"]}
-      appName="My React App"
+      appName="React Router App"
+      host="localhost"
+      port={3799}
     >
-      <App api={axiosInstance} />
+      <RouterProvider router={router} />
     </ReactLogProvider>
   </React.StrictMode>,
 );
 ```
 
-`createRouterAdapter()` works with browser History API navigation out of the box. It can also receive React Router data-router or history-like objects:
+### Optional Axios Instrumentation
+
+Axios works on web and mobile through the shared Axios adapter.
 
 ```tsx
-const logAdapters = [
-  createRouterAdapter({ router }),
-  createFetchAdapter(),
-  createAxiosAdapter(axiosInstance),
-];
+// src/api.ts
+import axios from "axios";
+
+export const api = axios.create({
+  baseURL: "https://api.example.com",
+  headers: {
+    "x-client": "web-dashboard",
+  },
+});
 ```
 
-### Runtime Status
+```tsx
+// src/main.tsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import {
+  ReactLogProvider,
+  createAxiosAdapter,
+  createFetchAdapter,
+  createRouterAdapter,
+} from "@anilkrblt/runtime";
 
-Use `useReactLogAgent()` when you want to expose connection state in a development-only panel.
+import App from "./App";
+import { api } from "./api";
+
+const logAdapters = [
+  createRouterAdapter(),
+  createFetchAdapter(),
+  createAxiosAdapter(api),
+];
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <ReactLogProvider
+      enabled={import.meta.env.DEV}
+      adapters={logAdapters}
+      redact={["authorization", "cookie", "password", "token"]}
+      appName="Axios Web App"
+    >
+      <App api={api} />
+    </ReactLogProvider>
+  </React.StrictMode>,
+);
+```
+
+## Quick Start: Mobile (React Native)
+
+React Native apps use the same provider with mobile-specific adapters. Use `createReactNativeFetchAdapter()` for `globalThis.fetch` and `createReactNavigationAdapter(navigationRef)` for screen correlation.
 
 ```tsx
-import { useReactLogAgent } from "@react-log-agent/runtime";
+// App.tsx
+import React from "react";
+import {
+  Button,
+  SafeAreaView,
+  Text,
+  View,
+} from "react-native";
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from "@react-navigation/native";
+import {
+  createNativeStackNavigator,
+  type NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+import {
+  ReactLogProvider,
+  createReactNativeFetchAdapter,
+  createReactNavigationAdapter,
+} from "@anilkrblt/runtime";
+
+type RootStackParamList = {
+  Home: undefined;
+  Details: {
+    id: string;
+  };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
+const logAdapters = [
+  createReactNavigationAdapter(navigationRef),
+  createReactNativeFetchAdapter(),
+];
+
+const redactRules = [
+  "authorization",
+  "cookie",
+  "password",
+  "token",
+];
+
+function HomeScreen({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "Home">) {
+  async function loadProfile() {
+    await fetch("https://jsonplaceholder.typicode.com/users/1", {
+      headers: {
+        Authorization: "Bearer mobile-secret-token",
+      },
+    });
+  }
+
+  async function submitSensitivePayload() {
+    await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer mobile-secret-token",
+      },
+      body: JSON.stringify({
+        username: "mobile-user",
+        password: "super-secret-password",
+        token: "client-side-token",
+      }),
+    });
+  }
+
+  return (
+    <SafeAreaView>
+      <View style={{ gap: 12, padding: 24 }}>
+        <Text>React Log Agent Mobile Demo</Text>
+        <Button title="Load profile" onPress={loadProfile} />
+        <Button title="Send redacted payload" onPress={submitSensitivePayload} />
+        <Button
+          title="Open details"
+          onPress={() => navigation.navigate("Details", { id: "42" })}
+        />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function DetailsScreen({
+  route,
+}: NativeStackScreenProps<RootStackParamList, "Details">) {
+  return (
+    <SafeAreaView>
+      <View style={{ padding: 24 }}>
+        <Text>Details screen: {route.params.id}</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+export default function App() {
+  return (
+    <ReactLogProvider
+      enabled={__DEV__}
+      adapters={logAdapters}
+      redact={redactRules}
+      appName="Mobile App"
+      host="192.168.1.25"
+      port={3799}
+    >
+      <NavigationContainer ref={navigationRef}>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Details" component={DetailsScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ReactLogProvider>
+  );
+}
+```
+
+### Mobile Network Note
+
+On a physical device or emulator, `localhost` usually points to the device, not your development machine. Run the CLI on your computer and pass your computer's LAN IP address to the runtime:
+
+```tsx
+<ReactLogProvider
+  enabled={__DEV__}
+  adapters={logAdapters}
+  appName="Mobile App"
+  host="192.168.1.25"
+  port={3799}
+>
+  <NavigationContainer ref={navigationRef}>{/* app */}</NavigationContainer>
+</ReactLogProvider>
+```
+
+Use the IP shown by your operating system for the active Wi-Fi or Ethernet interface, and make sure the device and computer are on the same network.
+
+## Runtime Status
+
+Expose runtime state in a development-only panel with `useReactLogAgent()`.
+
+```tsx
+import { useReactLogAgent } from "@anilkrblt/runtime";
 
 export function LogAgentStatus() {
   const agent = useReactLogAgent();
 
   return (
     <pre>
-      {agent.status}
-      {agent.currentRouteContext?.path}
+      {JSON.stringify(
+        {
+          status: agent.status,
+          activeProfile: agent.activeProfile,
+          sessionId: agent.sessionId,
+          route: agent.currentRouteContext?.path,
+        },
+        null,
+        2,
+      )}
     </pre>
   );
 }
@@ -201,15 +408,19 @@ export function LogAgentStatus() {
 
 ## Feature Showcase
 
+### Cross-Platform Runtime
+
+`@anilkrblt/runtime@0.1.0` targets browser React apps and React Native apps from the same package. The provider activates when `globalThis.WebSocket` is available, making it compatible with browser runtimes and React Native Hermes/JSC engines.
+
 ### Performance First
 
-The runtime transport keeps a bounded in-memory queue with a default limit of `100` events. If the CLI is slow or unavailable after handshake, the oldest logs are dropped first to protect the React app.
+The runtime transport keeps a bounded in-memory queue with a default limit of `100` events. If the CLI is slow after handshake, the oldest logs are dropped first to protect the app.
 
-Flushes are scheduled with `requestIdleCallback` when available, with `queueMicrotask` as the fallback. Interceptors are installed only after the CLI requests them through `SERVER_ACK`.
+Flushes use `requestIdleCallback` in browsers when available. React Native falls back to `setImmediate` or `setTimeout(callback, 0)` so Hermes and JSC do not crash on missing browser APIs.
 
 ### Privacy Guard
 
-Payloads are sanitized inside the browser before `JSON.stringify()` and before WebSocket transfer.
+Payloads are sanitized before `JSON.stringify()` and before WebSocket transfer.
 
 The runtime deep-scans plain objects and arrays, matching sensitive keys case-insensitively. Default rules redact:
 
@@ -218,35 +429,37 @@ The runtime deep-scans plain objects and arrays, matching sensitive keys case-in
 - `password`
 - `token`
 
-Matching values are replaced with `[REDACTED]`. Circular structures are protected with `WeakSet` and represented as `[Circular]`.
+Matching values become `[REDACTED]`. Circular structures are protected with `WeakSet` and represented as `[Circular]`.
 
 ### Event Correlation
 
-The router adapter keeps the active route context in the provider. Fetch and Axios events automatically inherit:
+Web route adapters and React Navigation adapters update the provider's active route context. Fetch and Axios events automatically inherit that context:
 
 ```ts
 {
   currentRouteContext: {
-    path: "/dashboard?tab=network",
+    path: "/Home/Details",
     navigationId: "navigation_...",
-    title: "My React App"
+    title: "Details"
   }
 }
 ```
 
-That means request, response, and error logs can be read as part of a user journey rather than isolated network calls.
+That lets you read network traffic as part of a user journey instead of isolated requests.
 
 ### Adapter Coverage
 
-| Adapter | Captures |
-| --- | --- |
-| `createFetchAdapter()` | Global `window.fetch` requests, responses, rejected calls, headers, latency, and best-effort bodies. |
-| `createAxiosAdapter(instance)` | Axios request/response/error interceptors with request IDs and latency. |
-| `createRouterAdapter(options?)` | Route transitions from React Router data routers, history-like listeners, or browser History API navigation. |
+| Adapter | Platform | Captures |
+| --- | --- | --- |
+| `createFetchAdapter()` | Web | `window.fetch` requests, responses, rejected calls, headers, latency, and best-effort bodies. |
+| `createAxiosAdapter(instance)` | Web and mobile | Axios request, response, and error interceptors with request IDs and latency. |
+| `createRouterAdapter(options?)` | Web | Browser History API, React Router data routers, and history-like listeners. |
+| `createReactNativeFetchAdapter()` | Mobile | React Native `globalThis.fetch` requests, responses, rejected calls, headers, latency, and best-effort bodies. |
+| `createReactNavigationAdapter(navigationRef)` | Mobile | React Navigation screen transitions and active screen context. |
 
 ## Protocol Events
 
-All emitted logs conform to the shared protocol package.
+Every emitted log conforms to `@anilkrblt/protocol`.
 
 ```ts
 type LogEvent =
@@ -256,11 +469,11 @@ type LogEvent =
   | HttpErrorEvent;
 ```
 
-Every event includes an `id`, `sessionId`, Unix epoch millisecond `timestamp`, source, and optional `currentRouteContext`.
+Each event includes an `id`, `sessionId`, Unix epoch millisecond `timestamp`, source, and optional `currentRouteContext`.
 
 ## Local Development
 
-Install dependencies from the root:
+Install workspace dependencies:
 
 ```bash
 npm install
@@ -289,18 +502,19 @@ npm run dev
 Run the workspace CLI:
 
 ```bash
-npm exec --workspace @react-log-agent/cli -- react-log-agent --help
-npm exec --workspace @react-log-agent/cli -- react-log-agent --profile all
+npm exec --workspace @anilkrblt/cli -- react-log-agent start --help
+npm exec --workspace @anilkrblt/cli -- react-log-agent start --profile all
 ```
 
 ## Safety Model
 
 React Log Agent is designed for development-time observability.
 
-- Use `enabled={import.meta.env.DEV}` or an equivalent environment guard.
-- Keep the CLI local; the runtime connects to `localhost` by default.
-- Treat browser-side redaction as the last line of defense, and avoid intentionally logging secrets.
-- Close the CLI to force adapter cleanup and return the app to its no-op state.
+- Use `enabled={import.meta.env.DEV}` on web or `enabled={__DEV__}` on React Native.
+- Keep the CLI local to your development machine.
+- For mobile devices, pass a reachable machine IP through `host`.
+- Treat browser and mobile redaction as the final safeguard, not as permission to intentionally log secrets.
+- Close the CLI to force adapter cleanup and return the runtime to its no-op state.
 
 ## License
 
