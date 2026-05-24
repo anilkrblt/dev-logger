@@ -1,0 +1,560 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ProcessRulesView.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=402c45b4"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport1_react from "/node_modules/.vite/deps/react.js?v=402c45b4"; const useState = __vite__cjsImport1_react["useState"];
+import { Plus, Trash2, Save, FileCode2, Code } from "/node_modules/.vite/deps/lucide-react.js?v=402c45b4";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "/components/ui/card.tsx";
+import { Button } from "/components/ui/button.tsx";
+import { Input } from "/components/ui/input.tsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/components/ui/select.tsx";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "/components/ui/table.tsx";
+import { ScrollArea } from "/components/ui/scroll-area.tsx";
+export default function ProcessRulesView() {
+  _s();
+  const [rules, setRules] = useState(
+    [
+      {
+        id: "rule-1",
+        processName: "create_waybill",
+        requiredSteps: ["validate_order", "check_inventory"],
+        validations: [
+          {
+            id: "v-1",
+            paramA: "order.status",
+            operator: "MUST_EQUAL",
+            paramB: '"APPROVED"'
+          }
+        ]
+      }
+    ]
+  );
+  const [processName, setProcessName] = useState("");
+  const [steps, setSteps] = useState([{ id: "s-init", value: "" }]);
+  const [validations, setValidations] = useState([]);
+  const [savedJson, setSavedJson] = useState(null);
+  const handleAddStep = () => {
+    setSteps([...steps, { id: `s-${Date.now()}`, value: "" }]);
+  };
+  const handleUpdateStep = (id, value) => {
+    setSteps(steps.map((s) => s.id === id ? { ...s, value } : s));
+  };
+  const handleRemoveStep = (id) => {
+    setSteps(steps.filter((s) => s.id !== id));
+  };
+  const handleAddValidation = () => {
+    setValidations(
+      [
+        ...validations,
+        { id: `v-${Date.now()}`, paramA: "", operator: "MUST_EQUAL", paramB: "" }
+      ]
+    );
+  };
+  const handleUpdateValidation = (id, field, value) => {
+    setValidations(validations.map((v) => v.id === id ? { ...v, [field]: value } : v));
+  };
+  const handleRemoveValidation = (id) => {
+    setValidations(validations.filter((v) => v.id !== id));
+  };
+  const handleSave = () => {
+    if (!processName) return;
+    const newRule = {
+      id: `rule-${Date.now()}`,
+      processName,
+      requiredSteps: steps.map((s) => s.value).filter(Boolean),
+      validations: validations.filter((v) => v.paramA && v.paramB)
+    };
+    setRules([newRule, ...rules]);
+    setSavedJson(JSON.stringify(newRule, null, 2));
+    setProcessName("");
+    setSteps([{ id: `s-${Date.now()}`, value: "" }]);
+    setValidations([]);
+  };
+  return /* @__PURE__ */ jsxDEV("div", { className: "space-y-8 font-sans", children: [
+    /* @__PURE__ */ jsxDEV("header", { children: [
+      /* @__PURE__ */ jsxDEV("h1", { className: "text-3xl font-semibold tracking-tight", children: "Process Rules" }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+        lineNumber: 84,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-muted-foreground mt-1", children: "Configure dynamic validations and required steps for API actions." }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+        lineNumber: 85,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+      lineNumber: 83,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-8", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "space-y-6", children: [
+        /* @__PURE__ */ jsxDEV(Card, { children: [
+          /* @__PURE__ */ jsxDEV(CardHeader, { children: [
+            /* @__PURE__ */ jsxDEV(CardTitle, { children: "Create New Rule" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 94,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV(CardDescription, { children: "Define a new process flow and parameters." }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 95,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 93,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(CardContent, { className: "space-y-6", children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ jsxDEV("label", { className: "text-sm font-medium", children: "Process Name" }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                lineNumber: 100,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV(
+                Input,
+                {
+                  placeholder: "e.g. create_waybill",
+                  value: processName,
+                  onChange: (e) => setProcessName(e.target.value)
+                },
+                void 0,
+                false,
+                {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 101,
+                  columnNumber: 17
+                },
+                this
+              )
+            ] }, void 0, true, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 99,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "space-y-3", children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
+                /* @__PURE__ */ jsxDEV("label", { className: "text-sm font-medium", children: "Required Steps" }, void 0, false, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 111,
+                  columnNumber: 19
+                }, this),
+                /* @__PURE__ */ jsxDEV(Button, { variant: "outline", size: "sm", onClick: handleAddStep, children: [
+                  /* @__PURE__ */ jsxDEV(Plus, { className: "h-4 w-4 mr-1" }, void 0, false, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 113,
+                    columnNumber: 21
+                  }, this),
+                  " Add Step"
+                ] }, void 0, true, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 112,
+                  columnNumber: 19
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                lineNumber: 110,
+                columnNumber: 17
+              }, this),
+              steps.map(
+                (step, index) => /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ jsxDEV("div", { className: "flex bg-muted text-muted-foreground text-xs w-6 h-6 rounded items-center justify-center font-mono", children: index + 1 }, void 0, false, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 118,
+                    columnNumber: 21
+                  }, this),
+                  /* @__PURE__ */ jsxDEV(
+                    Input,
+                    {
+                      placeholder: "step_name",
+                      value: step.value,
+                      onChange: (e) => handleUpdateStep(step.id, e.target.value)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                      lineNumber: 121,
+                      columnNumber: 21
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDEV(Button, { variant: "ghost", size: "icon", className: "text-destructive hover:bg-destructive/10 hover:text-destructive", onClick: () => handleRemoveStep(step.id), children: /* @__PURE__ */ jsxDEV(Trash2, { className: "h-4 w-4" }, void 0, false, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 127,
+                    columnNumber: 23
+                  }, this) }, void 0, false, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 126,
+                    columnNumber: 21
+                  }, this)
+                ] }, step.id, true, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 117,
+                  columnNumber: 17
+                }, this)
+              )
+            ] }, void 0, true, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 109,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "space-y-3 pt-4 border-t border-border", children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
+                /* @__PURE__ */ jsxDEV("label", { className: "text-sm font-medium", children: "Parameter validation" }, void 0, false, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 136,
+                  columnNumber: 19
+                }, this),
+                /* @__PURE__ */ jsxDEV(Button, { variant: "outline", size: "sm", onClick: handleAddValidation, children: [
+                  /* @__PURE__ */ jsxDEV(Plus, { className: "h-4 w-4 mr-1" }, void 0, false, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 138,
+                    columnNumber: 21
+                  }, this),
+                  " Add Rule"
+                ] }, void 0, true, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 137,
+                  columnNumber: 19
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                lineNumber: 135,
+                columnNumber: 17
+              }, this),
+              validations.map(
+                (val) => /* @__PURE__ */ jsxDEV("div", { className: "flex items-start gap-2 bg-muted/30 p-2 rounded-lg border border-border", children: [
+                  /* @__PURE__ */ jsxDEV(
+                    Input,
+                    {
+                      placeholder: "paramA",
+                      value: val.paramA,
+                      onChange: (e) => handleUpdateValidation(val.id, "paramA", e.target.value),
+                      className: "w-1/3"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                      lineNumber: 143,
+                      columnNumber: 21
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDEV(Select, { value: val.operator, onValueChange: (val2) => handleUpdateValidation(val2.id, "operator", val2), children: [
+                    /* @__PURE__ */ jsxDEV(SelectTrigger, { className: "w-1/3", children: /* @__PURE__ */ jsxDEV(SelectValue, { placeholder: "Operator" }, void 0, false, {
+                      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                      lineNumber: 151,
+                      columnNumber: 25
+                    }, this) }, void 0, false, {
+                      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                      lineNumber: 150,
+                      columnNumber: 23
+                    }, this),
+                    /* @__PURE__ */ jsxDEV(SelectContent, { children: [
+                      /* @__PURE__ */ jsxDEV(SelectItem, { value: "MUST_EQUAL", children: "MUST_EQUAL" }, void 0, false, {
+                        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                        lineNumber: 154,
+                        columnNumber: 25
+                      }, this),
+                      /* @__PURE__ */ jsxDEV(SelectItem, { value: "MUST_NOT_EQUAL", children: "MUST_NOT_EQUAL" }, void 0, false, {
+                        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                        lineNumber: 155,
+                        columnNumber: 25
+                      }, this),
+                      /* @__PURE__ */ jsxDEV(SelectItem, { value: "GREATER_THAN", children: "GREATER_THAN" }, void 0, false, {
+                        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                        lineNumber: 156,
+                        columnNumber: 25
+                      }, this),
+                      /* @__PURE__ */ jsxDEV(SelectItem, { value: "LESS_THAN", children: "LESS_THAN" }, void 0, false, {
+                        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                        lineNumber: 157,
+                        columnNumber: 25
+                      }, this)
+                    ] }, void 0, true, {
+                      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                      lineNumber: 153,
+                      columnNumber: 23
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 149,
+                    columnNumber: 21
+                  }, this),
+                  /* @__PURE__ */ jsxDEV(
+                    Input,
+                    {
+                      placeholder: "paramB or value",
+                      value: val.paramB,
+                      onChange: (e) => handleUpdateValidation(val.id, "paramB", e.target.value),
+                      className: "w-1/3"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                      lineNumber: 160,
+                      columnNumber: 21
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDEV(Button, { variant: "ghost", size: "icon", className: "text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0", onClick: () => handleRemoveValidation(val.id), children: /* @__PURE__ */ jsxDEV(Trash2, { className: "h-4 w-4" }, void 0, false, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 167,
+                    columnNumber: 23
+                  }, this) }, void 0, false, {
+                    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                    lineNumber: 166,
+                    columnNumber: 21
+                  }, this)
+                ] }, val.id, true, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 142,
+                  columnNumber: 17
+                }, this)
+              ),
+              validations.length === 0 && /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-muted-foreground italic", children: "No validation rules added yet." }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                lineNumber: 172,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 134,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 97,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(CardFooter, { className: "bg-muted/20 border-t border-border py-4 flex justify-between items-center", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "text-xs text-muted-foreground", children: "Rules are applied in real-time." }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 178,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV(Button, { onClick: handleSave, disabled: !processName, children: [
+              /* @__PURE__ */ jsxDEV(Save, { className: "h-4 w-4 mr-2" }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                lineNumber: 180,
+                columnNumber: 17
+              }, this),
+              "Save Configuration"
+            ] }, void 0, true, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 179,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 177,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+          lineNumber: 92,
+          columnNumber: 11
+        }, this),
+        savedJson && /* @__PURE__ */ jsxDEV(Card, { children: [
+          /* @__PURE__ */ jsxDEV(CardHeader, { className: "py-4 border-b border-border bg-muted/20", children: /* @__PURE__ */ jsxDEV(CardTitle, { className: "text-sm flex items-center", children: [
+            /* @__PURE__ */ jsxDEV(Code, { className: "h-4 w-4 mr-2" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 191,
+              columnNumber: 19
+            }, this),
+            "Generated JSON"
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 190,
+            columnNumber: 17
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 189,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV(CardContent, { className: "p-0", children: /* @__PURE__ */ jsxDEV("pre", { className: "p-4 bg-background text-foreground font-mono text-xs overflow-x-auto whitespace-pre-wrap", children: savedJson }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 196,
+            columnNumber: 17
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 195,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+          lineNumber: 188,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+        lineNumber: 91,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { children: /* @__PURE__ */ jsxDEV(Card, { className: "h-full flex flex-col max-h-[800px]", children: [
+        /* @__PURE__ */ jsxDEV(CardHeader, { children: [
+          /* @__PURE__ */ jsxDEV(CardTitle, { className: "flex items-center gap-2", children: [
+            /* @__PURE__ */ jsxDEV(FileCode2, { className: "h-4 w-4" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 210,
+              columnNumber: 17
+            }, this),
+            "Configured Rules"
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 209,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV(CardDescription, { children: "All currently active process constraints." }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 213,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+          lineNumber: 208,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "flex-1 overflow-hidden", children: /* @__PURE__ */ jsxDEV(ScrollArea, { className: "h-full", children: /* @__PURE__ */ jsxDEV(Table, { children: [
+          /* @__PURE__ */ jsxDEV(TableHeader, { className: "bg-muted/50 sticky top-0", children: /* @__PURE__ */ jsxDEV(TableRow, { children: [
+            /* @__PURE__ */ jsxDEV(TableHead, { children: "Process" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 220,
+              columnNumber: 23
+            }, this),
+            /* @__PURE__ */ jsxDEV(TableHead, { className: "w-[120px]", children: "Steps" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 221,
+              columnNumber: 23
+            }, this),
+            /* @__PURE__ */ jsxDEV(TableHead, { className: "w-[140px]", children: "Validations" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 222,
+              columnNumber: 23
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 219,
+            columnNumber: 21
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 218,
+            columnNumber: 19
+          }, this),
+          /* @__PURE__ */ jsxDEV(TableBody, { children: [
+            rules.map(
+              (rule) => /* @__PURE__ */ jsxDEV(TableRow, { children: [
+                /* @__PURE__ */ jsxDEV(TableCell, { className: "font-semibold text-sm font-mono", children: rule.processName }, void 0, false, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 228,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV(TableCell, { children: /* @__PURE__ */ jsxDEV("span", { className: "bg-primary/10 text-primary text-xs px-2 py-1 rounded", children: [
+                  rule.requiredSteps.length,
+                  " steps"
+                ] }, void 0, true, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 232,
+                  columnNumber: 27
+                }, this) }, void 0, false, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 231,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV(TableCell, { children: /* @__PURE__ */ jsxDEV("span", { className: "bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded", children: [
+                  rule.validations.length,
+                  " rules"
+                ] }, void 0, true, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 237,
+                  columnNumber: 27
+                }, this) }, void 0, false, {
+                  fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                  lineNumber: 236,
+                  columnNumber: 25
+                }, this)
+              ] }, rule.id, true, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+                lineNumber: 227,
+                columnNumber: 21
+              }, this)
+            ),
+            rules.length === 0 && /* @__PURE__ */ jsxDEV(TableRow, { children: /* @__PURE__ */ jsxDEV(TableCell, { colSpan: 3, className: "text-center text-muted-foreground py-10", children: "No rules defined." }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 245,
+              columnNumber: 25
+            }, this) }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+              lineNumber: 244,
+              columnNumber: 21
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+            lineNumber: 225,
+            columnNumber: 19
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+          lineNumber: 217,
+          columnNumber: 17
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+          lineNumber: 216,
+          columnNumber: 15
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+          lineNumber: 215,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+        lineNumber: 207,
+        columnNumber: 11
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+        lineNumber: 206,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+      lineNumber: 88,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx",
+    lineNumber: 82,
+    columnNumber: 5
+  }, this);
+}
+_s(ProcessRulesView, "2Wba+1V/msAQNzM7xhUf7Tnlex0=");
+_c = ProcessRulesView;
+var _c;
+$RefreshReg$(_c, "ProcessRulesView");
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+function $RefreshReg$(type, id) {
+  return RefreshRuntime.register(type, "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/ProcessRulesView.tsx " + id);
+}
+function $RefreshSig$() {
+  return RefreshRuntime.createSignatureFunctionForTransform();
+}
+
+//# sourceMappingURL=data:application/json;base64,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O0FBQUE7QUFBQTtBQUFBO0FBQUEsdUJBSUE7QUFBQSxnQkFDQSx1QkFBQyxhQUNDLGlDQUFDLFVBQUssV0FBVSxvRUFDYkM7QUFBQUEsdUJBQUtuQyxZQUFZa0M7QUFBQUEsa0JBQU87QUFBQSxxQkFEM0I7QUFBQTtBQUFBO0FBQUE7QUFBQSx1QkFFQSxLQUhGO0FBQUE7QUFBQTtBQUFBO0FBQUEsdUJBSUE7QUFBQSxtQkFiYUMsS0FBS3RDLElBQXBCO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBY0E7QUFBQSxZQUNEO0FBQUEsWUFDQUYsTUFBTXVDLFdBQVcsS0FDaEIsdUJBQUMsWUFDQyxpQ0FBQyxhQUFVLFNBQVMsR0FBRyxXQUFVLDJDQUF5QyxpQ0FBMUU7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQSxLQUhGO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBSUE7QUFBQSxlQXZCSjtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQXlCQTtBQUFBLGFBakNGO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFrQ0EsS0FuQ0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQW9DQSxLQXJDRjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBc0NBO0FBQUEsV0E5Q0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQStDQSxLQWhERjtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBaURBO0FBQUEsU0F2S0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQXlLQTtBQUFBLE9BL0tGO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0FnTEE7QUFFSjtBQUFDeEMsR0F4UHVCRCxrQkFBZ0I7QUFBQSxLQUFoQkE7QUFBZ0IsSUFBQTJDO0FBQUEsYUFBQUEsSUFBQSIsIm5hbWVzIjpbInVzZVN0YXRlIiwiUGx1cyIsIlRyYXNoMiIsIlNhdmUiLCJGaWxlQ29kZTIiLCJDb2RlIiwiQ2FyZCIsIkNhcmRDb250ZW50IiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIkNhcmREZXNjcmlwdGlvbiIsIkNhcmRGb290ZXIiLCJCdXR0b24iLCJJbnB1dCIsIlNlbGVjdCIsIlNlbGVjdENvbnRlbnQiLCJTZWxlY3RJdGVtIiwiU2VsZWN0VHJpZ2dlciIsIlNlbGVjdFZhbHVlIiwiVGFibGUiLCJUYWJsZUJvZHkiLCJUYWJsZUNlbGwiLCJUYWJsZUhlYWQiLCJUYWJsZUhlYWRlciIsIlRhYmxlUm93IiwiU2Nyb2xsQXJlYSIsIlByb2Nlc3NSdWxlc1ZpZXciLCJfcyIsInJ1bGVzIiwic2V0UnVsZXMiLCJpZCIsInByb2Nlc3NOYW1lIiwicmVxdWlyZWRTdGVwcyIsInZhbGlkYXRpb25zIiwicGFyYW1BIiwib3BlcmF0b3IiLCJwYXJhbUIiLCJzZXRQcm9jZXNzTmFtZSIsInN0ZXBzIiwic2V0U3RlcHMiLCJ2YWx1ZSIsInNldFZhbGlkYXRpb25zIiwic2F2ZWRKc29uIiwic2V0U2F2ZWRKc29uIiwiaGFuZGxlQWRkU3RlcCIsIkRhdGUiLCJub3ciLCJoYW5kbGVVcGRhdGVTdGVwIiwibWFwIiwicyIsImhhbmRsZVJlbW92ZVN0ZXAiLCJmaWx0ZXIiLCJoYW5kbGVBZGRWYWxpZGF0aW9uIiwiaGFuZGxlVXBkYXRlVmFsaWRhdGlvbiIsImZpZWxkIiwidiIsImhhbmRsZVJlbW92ZVZhbGlkYXRpb24iLCJoYW5kbGVTYXZlIiwibmV3UnVsZSIsIkJvb2xlYW4iLCJKU09OIiwic3RyaW5naWZ5IiwiZSIsInRhcmdldCIsInN0ZXAiLCJpbmRleCIsInZhbCIsImxlbmd0aCIsInJ1bGUiLCJfYyJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJQcm9jZXNzUnVsZXNWaWV3LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QsIHsgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBQbHVzLCBUcmFzaDIsIFNhdmUsIEZpbGVDb2RlMiwgQ29kZSB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBQcm9jZXNzUnVsZSwgUnVsZVZhbGlkYXRpb24gfSBmcm9tICcuLi90eXBlcyc7XG5cbmltcG9ydCB7IENhcmQsIENhcmRDb250ZW50LCBDYXJkSGVhZGVyLCBDYXJkVGl0bGUsIENhcmREZXNjcmlwdGlvbiwgQ2FyZEZvb3RlciB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgSW5wdXQgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvaW5wdXQnO1xuaW1wb3J0IHsgU2VsZWN0LCBTZWxlY3RDb250ZW50LCBTZWxlY3RJdGVtLCBTZWxlY3RUcmlnZ2VyLCBTZWxlY3RWYWx1ZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZWxlY3QnO1xuaW1wb3J0IHsgVGFibGUsIFRhYmxlQm9keSwgVGFibGVDZWxsLCBUYWJsZUhlYWQsIFRhYmxlSGVhZGVyLCBUYWJsZVJvdyB9IGZyb20gJ0AvY29tcG9uZW50cy91aS90YWJsZSc7XG5pbXBvcnQgeyBTY3JvbGxBcmVhIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3Njcm9sbC1hcmVhJztcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gUHJvY2Vzc1J1bGVzVmlldygpIHtcbiAgY29uc3QgW3J1bGVzLCBzZXRSdWxlc10gPSB1c2VTdGF0ZTxQcm9jZXNzUnVsZVtdPihbXG4gICAge1xuICAgICAgaWQ6ICdydWxlLTEnLFxuICAgICAgcHJvY2Vzc05hbWU6ICdjcmVhdGVfd2F5YmlsbCcsXG4gICAgICByZXF1aXJlZFN0ZXBzOiBbJ3ZhbGlkYXRlX29yZGVyJywgJ2NoZWNrX2ludmVudG9yeSddLFxuICAgICAgdmFsaWRhdGlvbnM6IFtcbiAgICAgICAge1xuICAgICAgICAgIGlkOiAndi0xJyxcbiAgICAgICAgICBwYXJhbUE6ICdvcmRlci5zdGF0dXMnLFxuICAgICAgICAgIG9wZXJhdG9yOiAnTVVTVF9FUVVBTCcsXG4gICAgICAgICAgcGFyYW1COiAnXCJBUFBST1ZFRFwiJyxcbiAgICAgICAgfVxuICAgICAgXVxuICAgIH1cbiAgXSk7XG5cbiAgLy8gRm9ybSBTdGF0ZVxuICBjb25zdCBbcHJvY2Vzc05hbWUsIHNldFByb2Nlc3NOYW1lXSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW3N0ZXBzLCBzZXRTdGVwc10gPSB1c2VTdGF0ZShbeyBpZDogJ3MtaW5pdCcsIHZhbHVlOiAnJyB9XSk7XG4gIGNvbnN0IFt2YWxpZGF0aW9ucywgc2V0VmFsaWRhdGlvbnNdID0gdXNlU3RhdGU8UnVsZVZhbGlkYXRpb25bXT4oW10pO1xuICBjb25zdCBbc2F2ZWRKc29uLCBzZXRTYXZlZEpzb25dID0gdXNlU3RhdGU8c3RyaW5nIHwgbnVsbD4obnVsbCk7XG5cbiAgY29uc3QgaGFuZGxlQWRkU3RlcCA9ICgpID0+IHtcbiAgICBzZXRTdGVwcyhbLi4uc3RlcHMsIHsgaWQ6IGBzLSR7RGF0ZS5ub3coKX1gLCB2YWx1ZTogJycgfV0pO1xuICB9O1xuXG4gIGNvbnN0IGhhbmRsZVVwZGF0ZVN0ZXAgPSAoaWQ6IHN0cmluZywgdmFsdWU6IHN0cmluZykgPT4ge1xuICAgIHNldFN0ZXBzKHN0ZXBzLm1hcChzID0+IHMuaWQgPT09IGlkID8geyAuLi5zLCB2YWx1ZSB9IDogcykpO1xuICB9O1xuXG4gIGNvbnN0IGhhbmRsZVJlbW92ZVN0ZXAgPSAoaWQ6IHN0cmluZykgPT4ge1xuICAgIHNldFN0ZXBzKHN0ZXBzLmZpbHRlcihzID0+IHMuaWQgIT09IGlkKSk7XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlQWRkVmFsaWRhdGlvbiA9ICgpID0+IHtcbiAgICBzZXRWYWxpZGF0aW9ucyhbXG4gICAgICAuLi52YWxpZGF0aW9ucywgXG4gICAgICB7IGlkOiBgdi0ke0RhdGUubm93KCl9YCwgcGFyYW1BOiAnJywgb3BlcmF0b3I6ICdNVVNUX0VRVUFMJywgcGFyYW1COiAnJyB9XG4gICAgXSk7XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlVXBkYXRlVmFsaWRhdGlvbiA9IChpZDogc3RyaW5nLCBmaWVsZDoga2V5b2YgUnVsZVZhbGlkYXRpb24sIHZhbHVlOiBzdHJpbmcpID0+IHtcbiAgICBzZXRWYWxpZGF0aW9ucyh2YWxpZGF0aW9ucy5tYXAodiA9PiB2LmlkID09PSBpZCA/IHsgLi4udiwgW2ZpZWxkXTogdmFsdWUgfSA6IHYpKTtcbiAgfTtcblxuICBjb25zdCBoYW5kbGVSZW1vdmVWYWxpZGF0aW9uID0gKGlkOiBzdHJpbmcpID0+IHtcbiAgICBzZXRWYWxpZGF0aW9ucyh2YWxpZGF0aW9ucy5maWx0ZXIodiA9PiB2LmlkICE9PSBpZCkpO1xuICB9O1xuXG4gIGNvbnN0IGhhbmRsZVNhdmUgPSAoKSA9PiB7XG4gICAgaWYgKCFwcm9jZXNzTmFtZSkgcmV0dXJuO1xuXG4gICAgY29uc3QgbmV3UnVsZTogUHJvY2Vzc1J1bGUgPSB7XG4gICAgICBpZDogYHJ1bGUtJHtEYXRlLm5vdygpfWAsXG4gICAgICBwcm9jZXNzTmFtZSxcbiAgICAgIHJlcXVpcmVkU3RlcHM6IHN0ZXBzLm1hcChzID0+IHMudmFsdWUpLmZpbHRlcihCb29sZWFuKSxcbiAgICAgIHZhbGlkYXRpb25zOiB2YWxpZGF0aW9ucy5maWx0ZXIodiA9PiB2LnBhcmFtQSAmJiB2LnBhcmFtQiksXG4gICAgfTtcblxuICAgIHNldFJ1bGVzKFtuZXdSdWxlLCAuLi5ydWxlc10pO1xuICAgIHNldFNhdmVkSnNvbihKU09OLnN0cmluZ2lmeShuZXdSdWxlLCBudWxsLCAyKSk7XG5cbiAgICAvLyBSZXNldCBmb3JtXG4gICAgc2V0UHJvY2Vzc05hbWUoJycpO1xuICAgIHNldFN0ZXBzKFt7IGlkOiBgcy0ke0RhdGUubm93KCl9YCwgdmFsdWU6ICcnIH1dKTtcbiAgICBzZXRWYWxpZGF0aW9ucyhbXSk7XG4gIH07XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktOCBmb250LXNhbnNcIj5cbiAgICAgIDxoZWFkZXI+XG4gICAgICAgIDxoMSBjbGFzc05hbWU9XCJ0ZXh0LTN4bCBmb250LXNlbWlib2xkIHRyYWNraW5nLXRpZ2h0XCI+UHJvY2VzcyBSdWxlczwvaDE+XG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIG10LTFcIj5Db25maWd1cmUgZHluYW1pYyB2YWxpZGF0aW9ucyBhbmQgcmVxdWlyZWQgc3RlcHMgZm9yIEFQSSBhY3Rpb25zLjwvcD5cbiAgICAgIDwvaGVhZGVyPlxuXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ3JpZC1jb2xzLTEgbGc6Z3JpZC1jb2xzLTIgZ2FwLThcIj5cbiAgICAgICAgXG4gICAgICAgIHsvKiBGb3JtIENvbnRhaW5lciAqL31cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTZcIj5cbiAgICAgICAgICA8Q2FyZD5cbiAgICAgICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgICAgICA8Q2FyZFRpdGxlPkNyZWF0ZSBOZXcgUnVsZTwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPkRlZmluZSBhIG5ldyBwcm9jZXNzIGZsb3cgYW5kIHBhcmFtZXRlcnMuPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwic3BhY2UteS02XCI+XG4gICAgICAgICAgICAgIFxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtXCI+UHJvY2VzcyBOYW1lPC9sYWJlbD5cbiAgICAgICAgICAgICAgICA8SW5wdXQgXG4gICAgICAgICAgICAgICAgICBwbGFjZWhvbGRlcj1cImUuZy4gY3JlYXRlX3dheWJpbGxcIiBcbiAgICAgICAgICAgICAgICAgIHZhbHVlPXtwcm9jZXNzTmFtZX1cbiAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXtlID0+IHNldFByb2Nlc3NOYW1lKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICB7LyogU3RlcHMgKi99XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtXCI+UmVxdWlyZWQgU3RlcHM8L2xhYmVsPlxuICAgICAgICAgICAgICAgICAgPEJ1dHRvbiB2YXJpYW50PVwib3V0bGluZVwiIHNpemU9XCJzbVwiIG9uQ2xpY2s9e2hhbmRsZUFkZFN0ZXB9PlxuICAgICAgICAgICAgICAgICAgICA8UGx1cyBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTFcIiAvPiBBZGQgU3RlcFxuICAgICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAge3N0ZXBzLm1hcCgoc3RlcCwgaW5kZXgpID0+IChcbiAgICAgICAgICAgICAgICAgIDxkaXYga2V5PXtzdGVwLmlkfSBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggYmctbXV0ZWQgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIHRleHQteHMgdy02IGgtNiByb3VuZGVkIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciBmb250LW1vbm9cIj5cbiAgICAgICAgICAgICAgICAgICAgICB7aW5kZXggKyAxfVxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPElucHV0IFxuICAgICAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPVwic3RlcF9uYW1lXCIgXG4gICAgICAgICAgICAgICAgICAgICAgdmFsdWU9e3N0ZXAudmFsdWV9XG4gICAgICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9e2UgPT4gaGFuZGxlVXBkYXRlU3RlcChzdGVwLmlkLCBlLnRhcmdldC52YWx1ZSl9XG4gICAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICAgIDxCdXR0b24gdmFyaWFudD1cImdob3N0XCIgc2l6ZT1cImljb25cIiBjbGFzc05hbWU9XCJ0ZXh0LWRlc3RydWN0aXZlIGhvdmVyOmJnLWRlc3RydWN0aXZlLzEwIGhvdmVyOnRleHQtZGVzdHJ1Y3RpdmVcIiBvbkNsaWNrPXsoKSA9PiBoYW5kbGVSZW1vdmVTdGVwKHN0ZXAuaWQpfT5cbiAgICAgICAgICAgICAgICAgICAgICA8VHJhc2gyIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICB7LyogVmFsaWRhdGlvbnMgKi99XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0zIHB0LTQgYm9yZGVyLXQgYm9yZGVyLWJvcmRlclwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bVwiPlBhcmFtZXRlciB2YWxpZGF0aW9uPC9sYWJlbD5cbiAgICAgICAgICAgICAgICAgIDxCdXR0b24gdmFyaWFudD1cIm91dGxpbmVcIiBzaXplPVwic21cIiBvbkNsaWNrPXtoYW5kbGVBZGRWYWxpZGF0aW9ufT5cbiAgICAgICAgICAgICAgICAgICAgPFBsdXMgY2xhc3NOYW1lPVwiaC00IHctNCBtci0xXCIgLz4gQWRkIFJ1bGVcbiAgICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIHt2YWxpZGF0aW9ucy5tYXAodmFsID0+IChcbiAgICAgICAgICAgICAgICAgIDxkaXYga2V5PXt2YWwuaWR9IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTIgYmctbXV0ZWQvMzAgcC0yIHJvdW5kZWQtbGcgYm9yZGVyIGJvcmRlci1ib3JkZXJcIj5cbiAgICAgICAgICAgICAgICAgICAgPElucHV0IFxuICAgICAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPVwicGFyYW1BXCIgXG4gICAgICAgICAgICAgICAgICAgICAgdmFsdWU9e3ZhbC5wYXJhbUF9XG4gICAgICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9e2UgPT4gaGFuZGxlVXBkYXRlVmFsaWRhdGlvbih2YWwuaWQsICdwYXJhbUEnLCBlLnRhcmdldC52YWx1ZSl9XG4gICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidy0xLzNcIlxuICAgICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgICAgICA8U2VsZWN0IHZhbHVlPXt2YWwub3BlcmF0b3J9IG9uVmFsdWVDaGFuZ2U9eyh2YWw6IGFueSkgPT4gaGFuZGxlVXBkYXRlVmFsaWRhdGlvbih2YWwuaWQsICdvcGVyYXRvcicsIHZhbCl9PlxuICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RUcmlnZ2VyIGNsYXNzTmFtZT1cInctMS8zXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0VmFsdWUgcGxhY2Vob2xkZXI9XCJPcGVyYXRvclwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgPC9TZWxlY3RUcmlnZ2VyPlxuICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJNVVNUX0VRVUFMXCI+TVVTVF9FUVVBTDwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiTVVTVF9OT1RfRVFVQUxcIj5NVVNUX05PVF9FUVVBTDwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiR1JFQVRFUl9USEFOXCI+R1JFQVRFUl9USEFOPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJMRVNTX1RIQU5cIj5MRVNTX1RIQU48L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgICAgPC9TZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdD5cbiAgICAgICAgICAgICAgICAgICAgPElucHV0IFxuICAgICAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPVwicGFyYW1CIG9yIHZhbHVlXCIgXG4gICAgICAgICAgICAgICAgICAgICAgdmFsdWU9e3ZhbC5wYXJhbUJ9XG4gICAgICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9e2UgPT4gaGFuZGxlVXBkYXRlVmFsaWRhdGlvbih2YWwuaWQsICdwYXJhbUInLCBlLnRhcmdldC52YWx1ZSl9XG4gICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidy0xLzNcIlxuICAgICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgICAgICA8QnV0dG9uIHZhcmlhbnQ9XCJnaG9zdFwiIHNpemU9XCJpY29uXCIgY2xhc3NOYW1lPVwidGV4dC1kZXN0cnVjdGl2ZSBob3ZlcjpiZy1kZXN0cnVjdGl2ZS8xMCBob3Zlcjp0ZXh0LWRlc3RydWN0aXZlIHNocmluay0wXCIgb25DbGljaz17KCkgPT4gaGFuZGxlUmVtb3ZlVmFsaWRhdGlvbih2YWwuaWQpfT5cbiAgICAgICAgICAgICAgICAgICAgICA8VHJhc2gyIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgIHt2YWxpZGF0aW9ucy5sZW5ndGggPT09IDAgJiYgKFxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmQgaXRhbGljXCI+Tm8gdmFsaWRhdGlvbiBydWxlcyBhZGRlZCB5ZXQuPC9wPlxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICAgICAgPENhcmRGb290ZXIgY2xhc3NOYW1lPVwiYmctbXV0ZWQvMjAgYm9yZGVyLXQgYm9yZGVyLWJvcmRlciBweS00IGZsZXgganVzdGlmeS1iZXR3ZWVuIGl0ZW1zLWNlbnRlclwiPlxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlJ1bGVzIGFyZSBhcHBsaWVkIGluIHJlYWwtdGltZS48L3NwYW4+XG4gICAgICAgICAgICAgIDxCdXR0b24gb25DbGljaz17aGFuZGxlU2F2ZX0gZGlzYWJsZWQ9eyFwcm9jZXNzTmFtZX0+XG4gICAgICAgICAgICAgICAgPFNhdmUgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yXCIgLz5cbiAgICAgICAgICAgICAgICBTYXZlIENvbmZpZ3VyYXRpb25cbiAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICA8L0NhcmRGb290ZXI+XG4gICAgICAgICAgPC9DYXJkPlxuXG4gICAgICAgICAgey8qIEpTT04gT3V0cHV0IFZpZXdlciAqL31cbiAgICAgICAgICB7c2F2ZWRKc29uICYmIChcbiAgICAgICAgICAgIDxDYXJkPlxuICAgICAgICAgICAgICA8Q2FyZEhlYWRlciBjbGFzc05hbWU9XCJweS00IGJvcmRlci1iIGJvcmRlci1ib3JkZXIgYmctbXV0ZWQvMjBcIj5cbiAgICAgICAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cInRleHQtc20gZmxleCBpdGVtcy1jZW50ZXJcIj5cbiAgICAgICAgICAgICAgICAgIDxDb2RlIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMlwiIC8+XG4gICAgICAgICAgICAgICAgICBHZW5lcmF0ZWQgSlNPTlxuICAgICAgICAgICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTBcIj5cbiAgICAgICAgICAgICAgICA8cHJlIGNsYXNzTmFtZT1cInAtNCBiZy1iYWNrZ3JvdW5kIHRleHQtZm9yZWdyb3VuZCBmb250LW1vbm8gdGV4dC14cyBvdmVyZmxvdy14LWF1dG8gd2hpdGVzcGFjZS1wcmUtd3JhcFwiPlxuICAgICAgICAgICAgICAgICAge3NhdmVkSnNvbn1cbiAgICAgICAgICAgICAgICA8L3ByZT5cbiAgICAgICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgICAgIDwvQ2FyZD5cbiAgICAgICAgICApfVxuXG4gICAgICAgIDwvZGl2PlxuXG4gICAgICAgIHsvKiBFeGlzdGluZyBSdWxlcyBMaXN0ICovfVxuICAgICAgICA8ZGl2PlxuICAgICAgICAgIDxDYXJkIGNsYXNzTmFtZT1cImgtZnVsbCBmbGV4IGZsZXgtY29sIG1heC1oLVs4MDBweF1cIj5cbiAgICAgICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgPEZpbGVDb2RlMiBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICBDb25maWd1cmVkIFJ1bGVzXG4gICAgICAgICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPkFsbCBjdXJyZW50bHkgYWN0aXZlIHByb2Nlc3MgY29uc3RyYWludHMuPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMSBvdmVyZmxvdy1oaWRkZW5cIj5cbiAgICAgICAgICAgICAgPFNjcm9sbEFyZWEgY2xhc3NOYW1lPVwiaC1mdWxsXCI+XG4gICAgICAgICAgICAgICAgPFRhYmxlPlxuICAgICAgICAgICAgICAgICAgPFRhYmxlSGVhZGVyIGNsYXNzTmFtZT1cImJnLW11dGVkLzUwIHN0aWNreSB0b3AtMFwiPlxuICAgICAgICAgICAgICAgICAgICA8VGFibGVSb3c+XG4gICAgICAgICAgICAgICAgICAgICAgPFRhYmxlSGVhZD5Qcm9jZXNzPC9UYWJsZUhlYWQ+XG4gICAgICAgICAgICAgICAgICAgICAgPFRhYmxlSGVhZCBjbGFzc05hbWU9XCJ3LVsxMjBweF1cIj5TdGVwczwvVGFibGVIZWFkPlxuICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZUhlYWQgY2xhc3NOYW1lPVwidy1bMTQwcHhdXCI+VmFsaWRhdGlvbnM8L1RhYmxlSGVhZD5cbiAgICAgICAgICAgICAgICAgICAgPC9UYWJsZVJvdz5cbiAgICAgICAgICAgICAgICAgIDwvVGFibGVIZWFkZXI+XG4gICAgICAgICAgICAgICAgICA8VGFibGVCb2R5PlxuICAgICAgICAgICAgICAgICAgICB7cnVsZXMubWFwKHJ1bGUgPT4gKFxuICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZVJvdyBrZXk9e3J1bGUuaWR9PlxuICAgICAgICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbCBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIHRleHQtc20gZm9udC1tb25vXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIHtydWxlLnByb2Nlc3NOYW1lfVxuICAgICAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUNlbGw+XG4gICAgICAgICAgICAgICAgICAgICAgICA8VGFibGVDZWxsPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJiZy1wcmltYXJ5LzEwIHRleHQtcHJpbWFyeSB0ZXh0LXhzIHB4LTIgcHktMSByb3VuZGVkXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAge3J1bGUucmVxdWlyZWRTdGVwcy5sZW5ndGh9IHN0ZXBzXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvVGFibGVDZWxsPlxuICAgICAgICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiYmctc2Vjb25kYXJ5IHRleHQtc2Vjb25kYXJ5LWZvcmVncm91bmQgdGV4dC14cyBweC0yIHB5LTEgcm91bmRlZFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtydWxlLnZhbGlkYXRpb25zLmxlbmd0aH0gcnVsZXNcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUNlbGw+XG4gICAgICAgICAgICAgICAgICAgICAgPC9UYWJsZVJvdz5cbiAgICAgICAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICAgICAgICAgIHtydWxlcy5sZW5ndGggPT09IDAgJiYgKFxuICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZVJvdz5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZUNlbGwgY29sU3Bhbj17M30gY2xhc3NOYW1lPVwidGV4dC1jZW50ZXIgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIHB5LTEwXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIE5vIHJ1bGVzIGRlZmluZWQuXG4gICAgICAgICAgICAgICAgICAgICAgICA8L1RhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgICA8L1RhYmxlUm93PlxuICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgPC9UYWJsZUJvZHk+XG4gICAgICAgICAgICAgICAgPC9UYWJsZT5cbiAgICAgICAgICAgICAgPC9TY3JvbGxBcmVhPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9DYXJkPlxuICAgICAgICA8L2Rpdj5cblxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59XG4iXSwiZmlsZSI6IkM6L1VzZXJzL0FDRVIvRGVza3RvcC9kZXYtbG9nZ2VyLWRhc2hib2FyZC9zcmMvY29tcG9uZW50cy9Qcm9jZXNzUnVsZXNWaWV3LnRzeCJ9

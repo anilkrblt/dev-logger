@@ -1,0 +1,642 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/DashboardView.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=402c45b4"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport1_react from "/node_modules/.vite/deps/react.js?v=402c45b4"; const useState = __vite__cjsImport1_react["useState"]; const useMemo = __vite__cjsImport1_react["useMemo"]; const useEffect = __vite__cjsImport1_react["useEffect"];
+import { io } from "/node_modules/.vite/deps/socket__io-client.js?v=402c45b4";
+import {
+  Activity,
+  AlertCircle,
+  Search,
+  Filter,
+  Info,
+  ArrowUpDown,
+  CheckCircle2,
+  Wifi,
+  WifiOff
+} from "/node_modules/.vite/deps/lucide-react.js?v=402c45b4";
+import { Prism as SyntaxHighlighter } from "/node_modules/.vite/deps/react-syntax-highlighter.js?v=402c45b4";
+import { vscDarkPlus } from "/node_modules/.vite/deps/react-syntax-highlighter_dist_esm_styles_prism.js?v=402c45b4";
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card.tsx";
+import { Badge } from "/components/ui/badge.tsx";
+import { Button } from "/components/ui/button.tsx";
+import { Input } from "/components/ui/input.tsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/components/ui/select.tsx";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "/components/ui/table.tsx";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "/components/ui/sheet.tsx";
+import { ScrollArea } from "/components/ui/scroll-area.tsx";
+export default function DashboardView() {
+  _s();
+  const [logs, setLogs] = useState([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [selectedLog, setSelectedLog] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  useEffect(() => {
+    const socket = io("http://localhost:3000", {
+      reconnectionAttempts: 5,
+      timeout: 5e3
+    });
+    socket.on("connect", () => {
+      setIsConnected(true);
+    });
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+    socket.on("new_log", (newLog) => {
+      setLogs((prevLogs) => [newLog, ...prevLogs].slice(0, 500));
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+  const filteredLogs = useMemo(() => {
+    let result = logs.filter((log) => {
+      const matchesSearch = log.processName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesType = selectedType === "ALL" || log.type === selectedType;
+      return matchesSearch && matchesType;
+    });
+    result = result.sort((a, b) => {
+      const timeA = new Date(a.timestamp).getTime();
+      const timeB = new Date(b.timestamp).getTime();
+      return sortOrder === "desc" ? timeB - timeA : timeA - timeB;
+    });
+    return result;
+  }, [logs, searchQuery, selectedType, sortOrder]);
+  const totalLogs = logs.length;
+  const errorLogs = logs.filter((l) => l.type === "ERROR" || l.type === "RULE_FAIL").length;
+  const successLogs = logs.filter((l) => l.type === "SUCCESS").length;
+  const getCustomBadgeClasses = (type) => {
+    switch (type) {
+      case "ERROR":
+      case "RULE_FAIL":
+        return "bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20";
+      case "SUCCESS":
+        return "bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20";
+      case "UI_EVENT":
+        return "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20";
+      case "INFO":
+      default:
+        return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20";
+    }
+  };
+  const handleRowClick = (log) => {
+    setSelectedLog(log);
+    setIsSheetOpen(true);
+  };
+  const formatDate = (isoStr) => {
+    try {
+      return new Date(isoStr).toLocaleString("sv-SE", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        fractionalSecondDigits: 3
+      });
+    } catch {
+      return isoStr;
+    }
+  };
+  return /* @__PURE__ */ jsxDEV("div", { className: "space-y-8 font-sans", children: [
+    /* @__PURE__ */ jsxDEV("header", { className: "flex flex-col md:flex-row md:items-center justify-between gap-4", children: [
+      /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("h1", { className: "text-3xl font-semibold tracking-tight", children: "Live Logs" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 122,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-muted-foreground mt-1", children: "Real-time log events from React Native App" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 123,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 121,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "flex items-center", children: /* @__PURE__ */ jsxDEV(Badge, { variant: "outline", className: `py-1.5 px-3 flex items-center gap-2 ${isConnected ? "bg-green-500/10 text-green-600 border-green-500/30" : "bg-red-500/10 text-red-600 border-red-500/30"}`, children: [
+        isConnected ? /* @__PURE__ */ jsxDEV(Wifi, { className: "w-4 h-4" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 127,
+          columnNumber: 28
+        }, this) : /* @__PURE__ */ jsxDEV(WifiOff, { className: "w-4 h-4" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 127,
+          columnNumber: 59
+        }, this),
+        isConnected ? "Connected" : "Disconnected"
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 126,
+        columnNumber: 11
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 125,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 120,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: [
+      /* @__PURE__ */ jsxDEV(Card, { className: "bg-card", children: [
+        /* @__PURE__ */ jsxDEV(CardHeader, { className: "flex flex-row items-center justify-between pb-2", children: [
+          /* @__PURE__ */ jsxDEV(CardTitle, { className: "text-sm font-medium text-muted-foreground", children: "Total Logs" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 137,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(Activity, { className: "h-4 w-4 text-primary" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 138,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 136,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV(CardContent, { children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "text-2xl font-bold", children: totalLogs }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 141,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-muted-foreground", children: "In the current session" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 142,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 140,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 135,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Card, { className: "bg-card", children: [
+        /* @__PURE__ */ jsxDEV(CardHeader, { className: "flex flex-row items-center justify-between pb-2", children: [
+          /* @__PURE__ */ jsxDEV(CardTitle, { className: "text-sm font-medium text-muted-foreground", children: "Failed Operations" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 148,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(AlertCircle, { className: "h-4 w-4 text-destructive" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 149,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 147,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV(CardContent, { children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "text-2xl font-bold text-destructive", children: errorLogs }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 152,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-muted-foreground", children: "ERROR & RULE_FAIL" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 153,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 151,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 146,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Card, { className: "bg-card", children: [
+        /* @__PURE__ */ jsxDEV(CardHeader, { className: "flex flex-row items-center justify-between pb-2", children: [
+          /* @__PURE__ */ jsxDEV(CardTitle, { className: "text-sm font-medium text-muted-foreground", children: "Successful Operations" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 159,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(CheckCircle2, { className: "h-4 w-4 text-green-500" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 160,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 158,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV(CardContent, { children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "text-2xl font-bold text-green-500", children: successLogs }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 163,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-muted-foreground", children: "SUCCESS" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 164,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 162,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 157,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 134,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col sm:flex-row gap-4 items-center justify-between bg-card p-4 rounded-lg border border-border mt-6", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "relative w-full sm:max-w-md", children: [
+        /* @__PURE__ */ jsxDEV(Search, { className: "absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 172,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV(
+          Input,
+          {
+            placeholder: "Search process name...",
+            className: "pl-9 w-full bg-background",
+            value: searchQuery,
+            onChange: (e) => setSearchQuery(e.target.value)
+          },
+          void 0,
+          false,
+          {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 173,
+            columnNumber: 11
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 171,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "w-full sm:w-auto flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxDEV(Filter, { className: "h-4 w-4 text-muted-foreground hidden sm:block" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 182,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV(Select, { value: selectedType, onValueChange: setSelectedType, children: [
+          /* @__PURE__ */ jsxDEV(SelectTrigger, { className: "w-full sm:w-[180px] bg-background", children: /* @__PURE__ */ jsxDEV(SelectValue, { placeholder: "Filter by Type" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 185,
+            columnNumber: 15
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 184,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(SelectContent, { children: [
+            /* @__PURE__ */ jsxDEV(SelectItem, { value: "ALL", children: "All Events" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+              lineNumber: 188,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV(SelectItem, { value: "INFO", children: "INFO" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+              lineNumber: 189,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV(SelectItem, { value: "SUCCESS", children: "SUCCESS" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+              lineNumber: 190,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV(SelectItem, { value: "ERROR", children: "ERROR" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+              lineNumber: 191,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV(SelectItem, { value: "RULE_FAIL", children: "RULE_FAIL" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+              lineNumber: 192,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV(SelectItem, { value: "UI_EVENT", children: "UI_EVENT" }, void 0, false, {
+              fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+              lineNumber: 193,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 187,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 183,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV(
+          Button,
+          {
+            variant: "outline",
+            className: "w-full sm:w-auto bg-background",
+            onClick: () => setSortOrder((prev) => prev === "desc" ? "asc" : "desc"),
+            children: [
+              /* @__PURE__ */ jsxDEV(ArrowUpDown, { className: "h-4 w-4 mr-2 text-muted-foreground" }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 202,
+                columnNumber: 13
+              }, this),
+              sortOrder === "desc" ? "Newest First" : "Oldest First"
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 197,
+            columnNumber: 11
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 181,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 170,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Card, { className: "overflow-hidden", children: /* @__PURE__ */ jsxDEV(ScrollArea, { className: "h-[600px] w-full", children: /* @__PURE__ */ jsxDEV(Table, { children: [
+      /* @__PURE__ */ jsxDEV(TableHeader, { className: "bg-muted/50 sticky top-0 z-10", children: /* @__PURE__ */ jsxDEV(TableRow, { children: [
+        /* @__PURE__ */ jsxDEV(TableHead, { className: "w-[200px]", children: "Time" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 214,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDEV(TableHead, { className: "w-[120px]", children: "Type" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 215,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDEV(TableHead, { children: "Process Name" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 216,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDEV(TableHead, { className: "w-[80px] text-center", children: "Details" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 217,
+          columnNumber: 17
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 213,
+        columnNumber: 15
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 212,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV(TableBody, { children: filteredLogs.length === 0 ? /* @__PURE__ */ jsxDEV(TableRow, { children: /* @__PURE__ */ jsxDEV(TableCell, { colSpan: 4, className: "h-64 text-center text-muted-foreground", children: /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col items-center justify-center", children: [
+        /* @__PURE__ */ jsxDEV(Search, { className: "h-8 w-8 mb-4 opacity-50" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 225,
+          columnNumber: 23
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: "No logs found. Waiting for events..." }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 226,
+          columnNumber: 23
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 224,
+        columnNumber: 21
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 223,
+        columnNumber: 19
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 222,
+        columnNumber: 15
+      }, this) : filteredLogs.map(
+        (log) => /* @__PURE__ */ jsxDEV(
+          TableRow,
+          {
+            className: "cursor-pointer hover:bg-muted/50 transition-colors",
+            onClick: () => handleRowClick(log),
+            children: [
+              /* @__PURE__ */ jsxDEV(TableCell, { className: "font-mono text-xs text-muted-foreground whitespace-nowrap", children: formatDate(log.timestamp) }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 237,
+                columnNumber: 21
+              }, this),
+              /* @__PURE__ */ jsxDEV(TableCell, { children: /* @__PURE__ */ jsxDEV(Badge, { variant: "outline", className: `font-mono text-[10px] uppercase ${getCustomBadgeClasses(log.type)}`, children: log.type }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 241,
+                columnNumber: 23
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 240,
+                columnNumber: 21
+              }, this),
+              /* @__PURE__ */ jsxDEV(TableCell, { className: "font-medium text-sm", children: log.processName }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 245,
+                columnNumber: 21
+              }, this),
+              /* @__PURE__ */ jsxDEV(TableCell, { className: "text-center", children: /* @__PURE__ */ jsxDEV(Button, { variant: "ghost", size: "icon", className: "h-8 w-8 text-muted-foreground hover:text-primary", children: /* @__PURE__ */ jsxDEV(Info, { className: "h-4 w-4" }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 250,
+                columnNumber: 25
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 249,
+                columnNumber: 23
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+                lineNumber: 248,
+                columnNumber: 21
+              }, this)
+            ]
+          },
+          log.id,
+          true,
+          {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 232,
+            columnNumber: 15
+          },
+          this
+        )
+      ) }, void 0, false, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 220,
+        columnNumber: 13
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 211,
+      columnNumber: 11
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 210,
+      columnNumber: 9
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 209,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Sheet, { open: isSheetOpen, onOpenChange: setIsSheetOpen, children: /* @__PURE__ */ jsxDEV(SheetContent, { className: "sm:max-w-xl md:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur border-l-border p-0", children: selectedLog && /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col h-full", children: [
+      /* @__PURE__ */ jsxDEV(SheetHeader, { className: "p-6 border-b border-border bg-muted/20", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between mb-2", children: [
+          /* @__PURE__ */ jsxDEV(Badge, { className: `font-mono text-xs ${getCustomBadgeClasses(selectedLog.type)}`, children: selectedLog.type }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 268,
+            columnNumber: 19
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { className: "font-mono text-xs text-muted-foreground", children: formatDate(selectedLog.timestamp) }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 271,
+            columnNumber: 19
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 267,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDEV(SheetTitle, { className: "text-xl font-semibold break-all", children: selectedLog.processName }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 275,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDEV(SheetDescription, { className: "flex items-center gap-4 mt-2", children: /* @__PURE__ */ jsxDEV("span", { className: "flex items-center gap-1 text-xs text-muted-foreground", children: [
+          /* @__PURE__ */ jsxDEV(Activity, { className: "w-3 h-3" }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 280,
+            columnNumber: 21
+          }, this),
+          "ID: ",
+          /* @__PURE__ */ jsxDEV("span", { className: "font-mono", children: selectedLog.id }, void 0, false, {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 281,
+            columnNumber: 25
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 279,
+          columnNumber: 19
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 278,
+          columnNumber: 17
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 266,
+        columnNumber: 15
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "p-6 flex-grow", children: [
+        /* @__PURE__ */ jsxDEV("h3", { className: "text-sm font-medium mb-3 text-foreground", children: "Payload" }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 287,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "rounded-lg overflow-hidden border border-border", children: /* @__PURE__ */ jsxDEV(
+          SyntaxHighlighter,
+          {
+            language: "json",
+            style: vscDarkPlus,
+            customStyle: {
+              margin: 0,
+              padding: "1.5rem",
+              background: "hsl(var(--card))",
+              fontSize: "0.8125rem",
+              lineHeight: "1.5"
+            },
+            wrapLongLines: true,
+            children: JSON.stringify(selectedLog.payload, null, 2)
+          },
+          void 0,
+          false,
+          {
+            fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+            lineNumber: 290,
+            columnNumber: 19
+          },
+          this
+        ) }, void 0, false, {
+          fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+          lineNumber: 288,
+          columnNumber: 17
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+        lineNumber: 286,
+        columnNumber: 15
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 265,
+      columnNumber: 11
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 263,
+      columnNumber: 9
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+      lineNumber: 262,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx",
+    lineNumber: 117,
+    columnNumber: 5
+  }, this);
+}
+_s(DashboardView, "qL9ZTbFDI0DQVKag5QuhDtyXuVU=");
+_c = DashboardView;
+var _c;
+$RefreshReg$(_c, "DashboardView");
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+function $RefreshReg$(type, id) {
+  return RefreshRuntime.register(type, "C:/Users/ACER/Desktop/dev-logger-dashboard/src/components/DashboardView.tsx " + id);
+}
+function $RefreshSig$() {
+  return RefreshRuntime.createSignatureFunctionForTransform();
+}
+
+//# sourceMappingURL=data:application/json;base64,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QSxXQWpCRjtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBa0JBO0FBQUEsTUFFQSx1QkFBQyxTQUFJLFdBQVUsaUJBQ2I7QUFBQSwrQkFBQyxRQUFHLFdBQVUsNENBQTJDLHVCQUF6RDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWdFO0FBQUEsUUFDaEUsdUJBQUMsU0FBSSxXQUFVLG1EQUViO0FBQUEsVUFBQztBQUFBO0FBQUEsWUFDQyxVQUFTO0FBQUEsWUFDVCxPQUFPekY7QUFBQUEsWUFDUCxhQUFhO0FBQUEsY0FDWDBGLFFBQVE7QUFBQSxjQUNSQyxTQUFTO0FBQUEsY0FDVEMsWUFBWTtBQUFBLGNBQ1pDLFVBQVU7QUFBQSxjQUNWQyxZQUFZO0FBQUEsWUFDZDtBQUFBLFlBQ0EsZUFBZTtBQUFBLFlBRWRDLGVBQUtDLFVBQVUzRCxZQUFZNEQsU0FBUyxNQUFNLENBQUM7QUFBQTtBQUFBLFVBWjlDO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxRQWFBLEtBZkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQWdCQTtBQUFBLFdBbEJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFtQkE7QUFBQSxTQXhDRjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBeUNBLEtBM0NKO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0E2Q0EsS0E5Q0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQStDQTtBQUFBLE9BaE1GO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0FrTUE7QUFFSjtBQUFDdkUsR0E1UnVCRCxlQUFhO0FBQUEsS0FBYkE7QUFBYSxJQUFBeUU7QUFBQSxhQUFBQSxJQUFBIiwibmFtZXMiOlsidXNlU3RhdGUiLCJ1c2VNZW1vIiwidXNlRWZmZWN0IiwiaW8iLCJBY3Rpdml0eSIsIkFsZXJ0Q2lyY2xlIiwiU2VhcmNoIiwiRmlsdGVyIiwiSW5mbyIsIkFycm93VXBEb3duIiwiQ2hlY2tDaXJjbGUyIiwiV2lmaSIsIldpZmlPZmYiLCJQcmlzbSIsIlN5bnRheEhpZ2hsaWdodGVyIiwidnNjRGFya1BsdXMiLCJDYXJkIiwiQ2FyZENvbnRlbnQiLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwiQmFkZ2UiLCJCdXR0b24iLCJJbnB1dCIsIlNlbGVjdCIsIlNlbGVjdENvbnRlbnQiLCJTZWxlY3RJdGVtIiwiU2VsZWN0VHJpZ2dlciIsIlNlbGVjdFZhbHVlIiwiVGFibGUiLCJUYWJsZUJvZHkiLCJUYWJsZUNlbGwiLCJUYWJsZUhlYWQiLCJUYWJsZUhlYWRlciIsIlRhYmxlUm93IiwiU2hlZXQiLCJTaGVldENvbnRlbnQiLCJTaGVldEhlYWRlciIsIlNoZWV0VGl0bGUiLCJTaGVldERlc2NyaXB0aW9uIiwiU2Nyb2xsQXJlYSIsIkRhc2hib2FyZFZpZXciLCJfcyIsImxvZ3MiLCJzZXRMb2dzIiwiaXNDb25uZWN0ZWQiLCJzZXRJc0Nvbm5lY3RlZCIsInNlYXJjaFF1ZXJ5Iiwic2V0U2VhcmNoUXVlcnkiLCJzZWxlY3RlZFR5cGUiLCJzZXRTZWxlY3RlZFR5cGUiLCJzb3J0T3JkZXIiLCJzZXRTb3J0T3JkZXIiLCJzZWxlY3RlZExvZyIsInNldFNlbGVjdGVkTG9nIiwiaXNTaGVldE9wZW4iLCJzZXRJc1NoZWV0T3BlbiIsInNvY2tldCIsInJlY29ubmVjdGlvbkF0dGVtcHRzIiwidGltZW91dCIsIm9uIiwibmV3TG9nIiwicHJldkxvZ3MiLCJzbGljZSIsImRpc2Nvbm5lY3QiLCJmaWx0ZXJlZExvZ3MiLCJyZXN1bHQiLCJmaWx0ZXIiLCJsb2ciLCJtYXRjaGVzU2VhcmNoIiwicHJvY2Vzc05hbWUiLCJ0b0xvd2VyQ2FzZSIsImluY2x1ZGVzIiwibWF0Y2hlc1R5cGUiLCJ0eXBlIiwic29ydCIsImEiLCJiIiwidGltZUEiLCJEYXRlIiwidGltZXN0YW1wIiwiZ2V0VGltZSIsInRpbWVCIiwidG90YWxMb2dzIiwibGVuZ3RoIiwiZXJyb3JMb2dzIiwibCIsInN1Y2Nlc3NMb2dzIiwiZ2V0Q3VzdG9tQmFkZ2VDbGFzc2VzIiwiaGFuZGxlUm93Q2xpY2siLCJmb3JtYXREYXRlIiwiaXNvU3RyIiwidG9Mb2NhbGVTdHJpbmciLCJ5ZWFyIiwibW9udGgiLCJkYXkiLCJob3VyIiwibWludXRlIiwic2Vjb25kIiwiZnJhY3Rpb25hbFNlY29uZERpZ2l0cyIsImUiLCJ0YXJnZXQiLCJ2YWx1ZSIsInByZXYiLCJtYXAiLCJpZCIsIm1hcmdpbiIsInBhZGRpbmciLCJiYWNrZ3JvdW5kIiwiZm9udFNpemUiLCJsaW5lSGVpZ2h0IiwiSlNPTiIsInN0cmluZ2lmeSIsInBheWxvYWQiLCJfYyJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJEYXNoYm9hcmRWaWV3LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QsIHsgdXNlU3RhdGUsIHVzZU1lbW8sIHVzZUVmZmVjdCB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IGlvLCBTb2NrZXQgfSBmcm9tICdzb2NrZXQuaW8tY2xpZW50JztcbmltcG9ydCB7IFxuICBBY3Rpdml0eSwgXG4gIEFsZXJ0Q2lyY2xlLCBcbiAgU2VhcmNoLCBcbiAgRmlsdGVyLFxuICBJbmZvLFxuICBBcnJvd1VwRG93bixcbiAgQ2hlY2tDaXJjbGUyLFxuICBYQ2lyY2xlLFxuICBXaWZpLFxuICBXaWZpT2ZmXG59IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBQcmlzbSBhcyBTeW50YXhIaWdobGlnaHRlciB9IGZyb20gJ3JlYWN0LXN5bnRheC1oaWdobGlnaHRlcic7XG5pbXBvcnQgeyB2c2NEYXJrUGx1cyB9IGZyb20gJ3JlYWN0LXN5bnRheC1oaWdobGlnaHRlci9kaXN0L2VzbS9zdHlsZXMvcHJpc20nO1xuXG5pbXBvcnQgeyBMb2dFbnRyeSB9IGZyb20gJy4uL3R5cGVzJztcblxuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IEJhZGdlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2JhZGdlJztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgSW5wdXQgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvaW5wdXQnO1xuaW1wb3J0IHsgU2VsZWN0LCBTZWxlY3RDb250ZW50LCBTZWxlY3RJdGVtLCBTZWxlY3RUcmlnZ2VyLCBTZWxlY3RWYWx1ZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZWxlY3QnO1xuaW1wb3J0IHsgVGFibGUsIFRhYmxlQm9keSwgVGFibGVDZWxsLCBUYWJsZUhlYWQsIFRhYmxlSGVhZGVyLCBUYWJsZVJvdyB9IGZyb20gJ0AvY29tcG9uZW50cy91aS90YWJsZSc7XG5pbXBvcnQgeyBTaGVldCwgU2hlZXRDb250ZW50LCBTaGVldEhlYWRlciwgU2hlZXRUaXRsZSwgU2hlZXREZXNjcmlwdGlvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9zaGVldCc7XG5pbXBvcnQgeyBTY3JvbGxBcmVhIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3Njcm9sbC1hcmVhJztcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gRGFzaGJvYXJkVmlldygpIHtcbiAgY29uc3QgW2xvZ3MsIHNldExvZ3NdID0gdXNlU3RhdGU8TG9nRW50cnlbXT4oW10pO1xuICBjb25zdCBbaXNDb25uZWN0ZWQsIHNldElzQ29ubmVjdGVkXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgXG4gIGNvbnN0IFtzZWFyY2hRdWVyeSwgc2V0U2VhcmNoUXVlcnldID0gdXNlU3RhdGUoJycpO1xuICBjb25zdCBbc2VsZWN0ZWRUeXBlLCBzZXRTZWxlY3RlZFR5cGVdID0gdXNlU3RhdGU8c3RyaW5nPignQUxMJyk7XG4gIGNvbnN0IFtzb3J0T3JkZXIsIHNldFNvcnRPcmRlcl0gPSB1c2VTdGF0ZTwnZGVzYycgfCAnYXNjJz4oJ2Rlc2MnKTtcbiAgXG4gIGNvbnN0IFtzZWxlY3RlZExvZywgc2V0U2VsZWN0ZWRMb2ddID0gdXNlU3RhdGU8TG9nRW50cnkgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW2lzU2hlZXRPcGVuLCBzZXRJc1NoZWV0T3Blbl0gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICAvLyBDb25uZWN0IHRvIFdlYlNvY2tldHNcbiAgICBjb25zdCBzb2NrZXQ6IFNvY2tldCA9IGlvKCdodHRwOi8vbG9jYWxob3N0OjMwMDAnLCB7XG4gICAgICByZWNvbm5lY3Rpb25BdHRlbXB0czogNSxcbiAgICAgIHRpbWVvdXQ6IDUwMDAsXG4gICAgfSk7XG5cbiAgICBzb2NrZXQub24oJ2Nvbm5lY3QnLCAoKSA9PiB7XG4gICAgICBzZXRJc0Nvbm5lY3RlZCh0cnVlKTtcbiAgICB9KTtcblxuICAgIHNvY2tldC5vbignZGlzY29ubmVjdCcsICgpID0+IHtcbiAgICAgIHNldElzQ29ubmVjdGVkKGZhbHNlKTtcbiAgICB9KTtcblxuICAgIHNvY2tldC5vbignbmV3X2xvZycsIChuZXdMb2c6IExvZ0VudHJ5KSA9PiB7XG4gICAgICBzZXRMb2dzKChwcmV2TG9ncykgPT4gW25ld0xvZywgLi4ucHJldkxvZ3NdLnNsaWNlKDAsIDUwMCkpOyAvLyBLZWVwIG1heCA1MDAgbG9nc1xuICAgIH0pO1xuXG4gICAgcmV0dXJuICgpID0+IHtcbiAgICAgIHNvY2tldC5kaXNjb25uZWN0KCk7XG4gICAgfTtcbiAgfSwgW10pO1xuXG4gIGNvbnN0IGZpbHRlcmVkTG9ncyA9IHVzZU1lbW8oKCkgPT4ge1xuICAgIGxldCByZXN1bHQgPSBsb2dzLmZpbHRlcigobG9nKSA9PiB7XG4gICAgICBjb25zdCBtYXRjaGVzU2VhcmNoID0gbG9nLnByb2Nlc3NOYW1lLnRvTG93ZXJDYXNlKCkuaW5jbHVkZXMoc2VhcmNoUXVlcnkudG9Mb3dlckNhc2UoKSk7XG4gICAgICBjb25zdCBtYXRjaGVzVHlwZSA9IHNlbGVjdGVkVHlwZSA9PT0gJ0FMTCcgfHwgbG9nLnR5cGUgPT09IHNlbGVjdGVkVHlwZTtcbiAgICAgIHJldHVybiBtYXRjaGVzU2VhcmNoICYmIG1hdGNoZXNUeXBlO1xuICAgIH0pO1xuXG4gICAgcmVzdWx0ID0gcmVzdWx0LnNvcnQoKGEsIGIpID0+IHtcbiAgICAgIGNvbnN0IHRpbWVBID0gbmV3IERhdGUoYS50aW1lc3RhbXApLmdldFRpbWUoKTtcbiAgICAgIGNvbnN0IHRpbWVCID0gbmV3IERhdGUoYi50aW1lc3RhbXApLmdldFRpbWUoKTtcbiAgICAgIHJldHVybiBzb3J0T3JkZXIgPT09ICdkZXNjJyA/IHRpbWVCIC0gdGltZUEgOiB0aW1lQSAtIHRpbWVCO1xuICAgIH0pO1xuXG4gICAgcmV0dXJuIHJlc3VsdDtcbiAgfSwgW2xvZ3MsIHNlYXJjaFF1ZXJ5LCBzZWxlY3RlZFR5cGUsIHNvcnRPcmRlcl0pO1xuXG4gIC8vIE1ldHJpY3MgY2FsY3VsYXRpb25cbiAgY29uc3QgdG90YWxMb2dzID0gbG9ncy5sZW5ndGg7XG4gIGNvbnN0IGVycm9yTG9ncyA9IGxvZ3MuZmlsdGVyKGwgPT4gbC50eXBlID09PSAnRVJST1InIHx8IGwudHlwZSA9PT0gJ1JVTEVfRkFJTCcpLmxlbmd0aDtcbiAgY29uc3Qgc3VjY2Vzc0xvZ3MgPSBsb2dzLmZpbHRlcihsID0+IGwudHlwZSA9PT0gJ1NVQ0NFU1MnKS5sZW5ndGg7XG5cbiAgY29uc3QgZ2V0Q3VzdG9tQmFkZ2VDbGFzc2VzID0gKHR5cGU6IHN0cmluZykgPT4ge1xuICAgIHN3aXRjaCAodHlwZSkge1xuICAgICAgY2FzZSAnRVJST1InOlxuICAgICAgY2FzZSAnUlVMRV9GQUlMJzpcbiAgICAgICAgcmV0dXJuICdiZy1yZWQtNTAwLzEwIHRleHQtcmVkLTUwMCBob3ZlcjpiZy1yZWQtNTAwLzIwIGJvcmRlci1yZWQtNTAwLzIwJztcbiAgICAgIGNhc2UgJ1NVQ0NFU1MnOlxuICAgICAgICByZXR1cm4gJ2JnLWdyZWVuLTUwMC8xMCB0ZXh0LWdyZWVuLTUwMCBob3ZlcjpiZy1ncmVlbi01MDAvMjAgYm9yZGVyLWdyZWVuLTUwMC8yMCc7XG4gICAgICBjYXNlICdVSV9FVkVOVCc6XG4gICAgICAgIHJldHVybiAnYmctcHVycGxlLTUwMC8xMCB0ZXh0LXB1cnBsZS01MDAgaG92ZXI6YmctcHVycGxlLTUwMC8yMCBib3JkZXItcHVycGxlLTUwMC8yMCc7XG4gICAgICBjYXNlICdJTkZPJzpcbiAgICAgIGRlZmF1bHQ6XG4gICAgICAgIHJldHVybiAnYmctYmx1ZS01MDAvMTAgdGV4dC1ibHVlLTUwMCBob3ZlcjpiZy1ibHVlLTUwMC8yMCBib3JkZXItYmx1ZS01MDAvMjAnO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBoYW5kbGVSb3dDbGljayA9IChsb2c6IExvZ0VudHJ5KSA9PiB7XG4gICAgc2V0U2VsZWN0ZWRMb2cobG9nKTtcbiAgICBzZXRJc1NoZWV0T3Blbih0cnVlKTtcbiAgfTtcblxuICBjb25zdCBmb3JtYXREYXRlID0gKGlzb1N0cjogc3RyaW5nKSA9PiB7XG4gICAgdHJ5IHtcbiAgICAgIHJldHVybiBuZXcgRGF0ZShpc29TdHIpLnRvTG9jYWxlU3RyaW5nKCdzdi1TRScsIHsgXG4gICAgICAgIHllYXI6ICdudW1lcmljJywgbW9udGg6ICcyLWRpZ2l0JywgZGF5OiAnMi1kaWdpdCcsXG4gICAgICAgIGhvdXI6ICcyLWRpZ2l0JywgbWludXRlOiAnMi1kaWdpdCcsIHNlY29uZDogJzItZGlnaXQnLCBmcmFjdGlvbmFsU2Vjb25kRGlnaXRzOiAzIFxuICAgICAgfSk7XG4gICAgfSBjYXRjaCB7XG4gICAgICByZXR1cm4gaXNvU3RyO1xuICAgIH1cbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS04IGZvbnQtc2Fuc1wiPlxuICAgICAgXG4gICAgICB7LyogSGVhZGVyICovfVxuICAgICAgPGhlYWRlciBjbGFzc05hbWU9XCJmbGV4IGZsZXgtY29sIG1kOmZsZXgtcm93IG1kOml0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTRcIj5cbiAgICAgICAgPGRpdj5cbiAgICAgICAgICA8aDEgY2xhc3NOYW1lPVwidGV4dC0zeGwgZm9udC1zZW1pYm9sZCB0cmFja2luZy10aWdodFwiPkxpdmUgTG9nczwvaDE+XG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmQgbXQtMVwiPlJlYWwtdGltZSBsb2cgZXZlbnRzIGZyb20gUmVhY3QgTmF0aXZlIEFwcDwvcD5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXJcIj5cbiAgICAgICAgICA8QmFkZ2UgdmFyaWFudD1cIm91dGxpbmVcIiBjbGFzc05hbWU9e2BweS0xLjUgcHgtMyBmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiAke2lzQ29ubmVjdGVkID8gJ2JnLWdyZWVuLTUwMC8xMCB0ZXh0LWdyZWVuLTYwMCBib3JkZXItZ3JlZW4tNTAwLzMwJyA6ICdiZy1yZWQtNTAwLzEwIHRleHQtcmVkLTYwMCBib3JkZXItcmVkLTUwMC8zMCd9YH0+XG4gICAgICAgICAgICB7aXNDb25uZWN0ZWQgPyA8V2lmaSBjbGFzc05hbWU9XCJ3LTQgaC00XCIgLz4gOiA8V2lmaU9mZiBjbGFzc05hbWU9XCJ3LTQgaC00XCIgLz59XG4gICAgICAgICAgICB7aXNDb25uZWN0ZWQgPyAnQ29ubmVjdGVkJyA6ICdEaXNjb25uZWN0ZWQnfVxuICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9oZWFkZXI+XG5cbiAgICAgIHsvKiBNZXRyaWNzIENhcmRzICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0xIG1kOmdyaWQtY29scy0zIGdhcC02XCI+XG4gICAgICAgIDxDYXJkIGNsYXNzTmFtZT1cImJnLWNhcmRcIj5cbiAgICAgICAgICA8Q2FyZEhlYWRlciBjbGFzc05hbWU9XCJmbGV4IGZsZXgtcm93IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gcGItMlwiPlxuICAgICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlRvdGFsIExvZ3M8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgIDxBY3Rpdml0eSBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtcHJpbWFyeVwiIC8+XG4gICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkXCI+e3RvdGFsTG9nc308L2Rpdj5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+SW4gdGhlIGN1cnJlbnQgc2Vzc2lvbjwvcD5cbiAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICA8L0NhcmQ+XG4gICAgICAgIFxuICAgICAgICA8Q2FyZCBjbGFzc05hbWU9XCJiZy1jYXJkXCI+XG4gICAgICAgICAgPENhcmRIZWFkZXIgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXJvdyBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHBiLTJcIj5cbiAgICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5GYWlsZWQgT3BlcmF0aW9uczwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgPEFsZXJ0Q2lyY2xlIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1kZXN0cnVjdGl2ZVwiIC8+XG4gICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkIHRleHQtZGVzdHJ1Y3RpdmVcIj57ZXJyb3JMb2dzfTwvZGl2PlxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5FUlJPUiAmIFJVTEVfRkFJTDwvcD5cbiAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICA8L0NhcmQ+XG5cbiAgICAgICAgPENhcmQgY2xhc3NOYW1lPVwiYmctY2FyZFwiPlxuICAgICAgICAgIDxDYXJkSGVhZGVyIGNsYXNzTmFtZT1cImZsZXggZmxleC1yb3cgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBwYi0yXCI+XG4gICAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+U3VjY2Vzc2Z1bCBPcGVyYXRpb25zPC9DYXJkVGl0bGU+XG4gICAgICAgICAgICA8Q2hlY2tDaXJjbGUyIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1ncmVlbi01MDBcIiAvPlxuICAgICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgICA8Q2FyZENvbnRlbnQ+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtMnhsIGZvbnQtYm9sZCB0ZXh0LWdyZWVuLTUwMFwiPntzdWNjZXNzTG9nc308L2Rpdj5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+U1VDQ0VTUzwvcD5cbiAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICA8L0NhcmQ+XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIENvbnRyb2xzICYgRmlsdGVycyAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LWNvbCBzbTpmbGV4LXJvdyBnYXAtNCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGJnLWNhcmQgcC00IHJvdW5kZWQtbGcgYm9yZGVyIGJvcmRlci1ib3JkZXIgbXQtNlwiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlIHctZnVsbCBzbTptYXgtdy1tZFwiPlxuICAgICAgICAgIDxTZWFyY2ggY2xhc3NOYW1lPVwiYWJzb2x1dGUgbGVmdC0yLjUgdG9wLTIuNSBoLTQgdy00IHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIC8+XG4gICAgICAgICAgPElucHV0IFxuICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCJTZWFyY2ggcHJvY2VzcyBuYW1lLi4uXCIgXG4gICAgICAgICAgICBjbGFzc05hbWU9XCJwbC05IHctZnVsbCBiZy1iYWNrZ3JvdW5kXCIgXG4gICAgICAgICAgICB2YWx1ZT17c2VhcmNoUXVlcnl9XG4gICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHNldFNlYXJjaFF1ZXJ5KGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAvPlxuICAgICAgICA8L2Rpdj5cbiAgICAgICAgXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidy1mdWxsIHNtOnctYXV0byBmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgIDxGaWx0ZXIgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LW11dGVkLWZvcmVncm91bmQgaGlkZGVuIHNtOmJsb2NrXCIgLz5cbiAgICAgICAgICA8U2VsZWN0IHZhbHVlPXtzZWxlY3RlZFR5cGV9IG9uVmFsdWVDaGFuZ2U9e3NldFNlbGVjdGVkVHlwZX0+XG4gICAgICAgICAgICA8U2VsZWN0VHJpZ2dlciBjbGFzc05hbWU9XCJ3LWZ1bGwgc206dy1bMTgwcHhdIGJnLWJhY2tncm91bmRcIj5cbiAgICAgICAgICAgICAgPFNlbGVjdFZhbHVlIHBsYWNlaG9sZGVyPVwiRmlsdGVyIGJ5IFR5cGVcIiAvPlxuICAgICAgICAgICAgPC9TZWxlY3RUcmlnZ2VyPlxuICAgICAgICAgICAgPFNlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiQUxMXCI+QWxsIEV2ZW50czwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJJTkZPXCI+SU5GTzwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJTVUNDRVNTXCI+U1VDQ0VTUzwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJFUlJPUlwiPkVSUk9SPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cIlJVTEVfRkFJTFwiPlJVTEVfRkFJTDwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJVSV9FVkVOVFwiPlVJX0VWRU5UPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgPC9TZWxlY3RDb250ZW50PlxuICAgICAgICAgIDwvU2VsZWN0PlxuICAgICAgICAgIFxuICAgICAgICAgIDxCdXR0b24gXG4gICAgICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiIFxuICAgICAgICAgICAgY2xhc3NOYW1lPVwidy1mdWxsIHNtOnctYXV0byBiZy1iYWNrZ3JvdW5kXCJcbiAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHNldFNvcnRPcmRlcihwcmV2ID0+IHByZXYgPT09ICdkZXNjJyA/ICdhc2MnIDogJ2Rlc2MnKX1cbiAgICAgICAgICA+XG4gICAgICAgICAgICA8QXJyb3dVcERvd24gY2xhc3NOYW1lPVwiaC00IHctNCBtci0yIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIC8+XG4gICAgICAgICAgICB7c29ydE9yZGVyID09PSAnZGVzYycgPyAnTmV3ZXN0IEZpcnN0JyA6ICdPbGRlc3QgRmlyc3QnfVxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvZGl2PlxuXG4gICAgICB7LyogTWFpbiBUYWJsZSAqL31cbiAgICAgIDxDYXJkIGNsYXNzTmFtZT1cIm92ZXJmbG93LWhpZGRlblwiPlxuICAgICAgICA8U2Nyb2xsQXJlYSBjbGFzc05hbWU9XCJoLVs2MDBweF0gdy1mdWxsXCI+XG4gICAgICAgICAgPFRhYmxlPlxuICAgICAgICAgICAgPFRhYmxlSGVhZGVyIGNsYXNzTmFtZT1cImJnLW11dGVkLzUwIHN0aWNreSB0b3AtMCB6LTEwXCI+XG4gICAgICAgICAgICAgIDxUYWJsZVJvdz5cbiAgICAgICAgICAgICAgICA8VGFibGVIZWFkIGNsYXNzTmFtZT1cInctWzIwMHB4XVwiPlRpbWU8L1RhYmxlSGVhZD5cbiAgICAgICAgICAgICAgICA8VGFibGVIZWFkIGNsYXNzTmFtZT1cInctWzEyMHB4XVwiPlR5cGU8L1RhYmxlSGVhZD5cbiAgICAgICAgICAgICAgICA8VGFibGVIZWFkPlByb2Nlc3MgTmFtZTwvVGFibGVIZWFkPlxuICAgICAgICAgICAgICAgIDxUYWJsZUhlYWQgY2xhc3NOYW1lPVwidy1bODBweF0gdGV4dC1jZW50ZXJcIj5EZXRhaWxzPC9UYWJsZUhlYWQ+XG4gICAgICAgICAgICAgIDwvVGFibGVSb3c+XG4gICAgICAgICAgICA8L1RhYmxlSGVhZGVyPlxuICAgICAgICAgICAgPFRhYmxlQm9keT5cbiAgICAgICAgICAgICAge2ZpbHRlcmVkTG9ncy5sZW5ndGggPT09IDAgPyAoXG4gICAgICAgICAgICAgICAgPFRhYmxlUm93PlxuICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbCBjb2xTcGFuPXs0fSBjbGFzc05hbWU9XCJoLTY0IHRleHQtY2VudGVyIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC1jb2wgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPFNlYXJjaCBjbGFzc05hbWU9XCJoLTggdy04IG1iLTQgb3BhY2l0eS01MFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgPHA+Tm8gbG9ncyBmb3VuZC4gV2FpdGluZyBmb3IgZXZlbnRzLi4uPC9wPlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDwvVGFibGVDZWxsPlxuICAgICAgICAgICAgICAgIDwvVGFibGVSb3c+XG4gICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRMb2dzLm1hcCgobG9nKSA9PiAoXG4gICAgICAgICAgICAgICAgICA8VGFibGVSb3cgXG4gICAgICAgICAgICAgICAgICAgIGtleT17bG9nLmlkfSBcbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiY3Vyc29yLXBvaW50ZXIgaG92ZXI6YmctbXV0ZWQvNTAgdHJhbnNpdGlvbi1jb2xvcnNcIlxuICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBoYW5kbGVSb3dDbGljayhsb2cpfVxuICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICA8VGFibGVDZWxsIGNsYXNzTmFtZT1cImZvbnQtbW9ubyB0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCB3aGl0ZXNwYWNlLW5vd3JhcFwiPlxuICAgICAgICAgICAgICAgICAgICAgIHtmb3JtYXREYXRlKGxvZy50aW1lc3RhbXApfVxuICAgICAgICAgICAgICAgICAgICA8L1RhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgICA8QmFkZ2UgdmFyaWFudD1cIm91dGxpbmVcIiBjbGFzc05hbWU9e2Bmb250LW1vbm8gdGV4dC1bMTBweF0gdXBwZXJjYXNlICR7Z2V0Q3VzdG9tQmFkZ2VDbGFzc2VzKGxvZy50eXBlKX1gfT5cbiAgICAgICAgICAgICAgICAgICAgICAgIHtsb2cudHlwZX1cbiAgICAgICAgICAgICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgICAgICAgICAgICA8L1RhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbCBjbGFzc05hbWU9XCJmb250LW1lZGl1bSB0ZXh0LXNtXCI+XG4gICAgICAgICAgICAgICAgICAgICAge2xvZy5wcm9jZXNzTmFtZX1cbiAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUNlbGw+XG4gICAgICAgICAgICAgICAgICAgIDxUYWJsZUNlbGwgY2xhc3NOYW1lPVwidGV4dC1jZW50ZXJcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8QnV0dG9uIHZhcmlhbnQ9XCJnaG9zdFwiIHNpemU9XCJpY29uXCIgY2xhc3NOYW1lPVwiaC04IHctOCB0ZXh0LW11dGVkLWZvcmVncm91bmQgaG92ZXI6dGV4dC1wcmltYXJ5XCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8SW5mbyBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUNlbGw+XG4gICAgICAgICAgICAgICAgICA8L1RhYmxlUm93PlxuICAgICAgICAgICAgICAgICkpXG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8L1RhYmxlQm9keT5cbiAgICAgICAgICA8L1RhYmxlPlxuICAgICAgICA8L1Njcm9sbEFyZWE+XG4gICAgICA8L0NhcmQ+XG5cbiAgICAgIHsvKiBEZXRhaWwgVmlldyBEcmF3ZXIgKFNoZWV0KSAqL31cbiAgICAgIDxTaGVldCBvcGVuPXtpc1NoZWV0T3Blbn0gb25PcGVuQ2hhbmdlPXtzZXRJc1NoZWV0T3Blbn0+XG4gICAgICAgIDxTaGVldENvbnRlbnQgY2xhc3NOYW1lPVwic206bWF4LXcteGwgbWQ6bWF4LXctMnhsIG92ZXJmbG93LXktYXV0byBiZy1iYWNrZ3JvdW5kLzk1IGJhY2tkcm9wLWJsdXIgYm9yZGVyLWwtYm9yZGVyIHAtMFwiPlxuICAgICAgICAgIHtzZWxlY3RlZExvZyAmJiAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC1jb2wgaC1mdWxsXCI+XG4gICAgICAgICAgICAgIDxTaGVldEhlYWRlciBjbGFzc05hbWU9XCJwLTYgYm9yZGVyLWIgYm9yZGVyLWJvcmRlciBiZy1tdXRlZC8yMFwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIG1iLTJcIj5cbiAgICAgICAgICAgICAgICAgIDxCYWRnZSBjbGFzc05hbWU9e2Bmb250LW1vbm8gdGV4dC14cyAke2dldEN1c3RvbUJhZGdlQ2xhc3NlcyhzZWxlY3RlZExvZy50eXBlKX1gfT5cbiAgICAgICAgICAgICAgICAgICAge3NlbGVjdGVkTG9nLnR5cGV9XG4gICAgICAgICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tb25vIHRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgIHtmb3JtYXREYXRlKHNlbGVjdGVkTG9nLnRpbWVzdGFtcCl9XG4gICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPFNoZWV0VGl0bGUgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LXNlbWlib2xkIGJyZWFrLWFsbFwiPlxuICAgICAgICAgICAgICAgICAge3NlbGVjdGVkTG9nLnByb2Nlc3NOYW1lfVxuICAgICAgICAgICAgICAgIDwvU2hlZXRUaXRsZT5cbiAgICAgICAgICAgICAgICA8U2hlZXREZXNjcmlwdGlvbiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtNCBtdC0yXCI+XG4gICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMSB0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICA8QWN0aXZpdHkgY2xhc3NOYW1lPVwidy0zIGgtM1wiIC8+XG4gICAgICAgICAgICAgICAgICAgIElEOiA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1vbm9cIj57c2VsZWN0ZWRMb2cuaWR9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgIDwvU2hlZXREZXNjcmlwdGlvbj5cbiAgICAgICAgICAgICAgPC9TaGVldEhlYWRlcj5cbiAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicC02IGZsZXgtZ3Jvd1wiPlxuICAgICAgICAgICAgICAgIDxoMyBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtIG1iLTMgdGV4dC1mb3JlZ3JvdW5kXCI+UGF5bG9hZDwvaDM+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLWxnIG92ZXJmbG93LWhpZGRlbiBib3JkZXIgYm9yZGVyLWJvcmRlclwiPlxuICAgICAgICAgICAgICAgICAgey8qIFN5bnRheCBIaWdobGFuZCBmb3IgSlNPTiAqL31cbiAgICAgICAgICAgICAgICAgIDxTeW50YXhIaWdobGlnaHRlclxuICAgICAgICAgICAgICAgICAgICBsYW5ndWFnZT1cImpzb25cIlxuICAgICAgICAgICAgICAgICAgICBzdHlsZT17dnNjRGFya1BsdXN9XG4gICAgICAgICAgICAgICAgICAgIGN1c3RvbVN0eWxlPXt7XG4gICAgICAgICAgICAgICAgICAgICAgbWFyZ2luOiAwLFxuICAgICAgICAgICAgICAgICAgICAgIHBhZGRpbmc6ICcxLjVyZW0nLFxuICAgICAgICAgICAgICAgICAgICAgIGJhY2tncm91bmQ6ICdoc2wodmFyKC0tY2FyZCkpJyxcbiAgICAgICAgICAgICAgICAgICAgICBmb250U2l6ZTogJzAuODEyNXJlbScsXG4gICAgICAgICAgICAgICAgICAgICAgbGluZUhlaWdodDogJzEuNScsXG4gICAgICAgICAgICAgICAgICAgIH19XG4gICAgICAgICAgICAgICAgICAgIHdyYXBMb25nTGluZXM9e3RydWV9XG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIHtKU09OLnN0cmluZ2lmeShzZWxlY3RlZExvZy5wYXlsb2FkLCBudWxsLCAyKX1cbiAgICAgICAgICAgICAgICAgIDwvU3ludGF4SGlnaGxpZ2h0ZXI+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cbiAgICAgICAgPC9TaGVldENvbnRlbnQ+XG4gICAgICA8L1NoZWV0PlxuXG4gICAgPC9kaXY+XG4gICk7XG59XG5cbiJdLCJmaWxlIjoiQzovVXNlcnMvQUNFUi9EZXNrdG9wL2Rldi1sb2dnZXItZGFzaGJvYXJkL3NyYy9jb21wb25lbnRzL0Rhc2hib2FyZFZpZXcudHN4In0=

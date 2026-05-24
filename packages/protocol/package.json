@@ -1,0 +1,49 @@
+{
+  "name": "@react-log-agent/protocol",
+  "version": "0.0.0",
+  "description": "Shared protocol types for React Log Agent runtime and CLI packages.",
+  "type": "module",
+  "license": "MIT",
+  "author": "React Log Agent Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/react-log-agent/react-log-agent.git",
+    "directory": "packages/protocol"
+  },
+  "bugs": {
+    "url": "https://github.com/react-log-agent/react-log-agent/issues"
+  },
+  "homepage": "https://github.com/react-log-agent/react-log-agent#readme",
+  "keywords": [
+    "react",
+    "logging",
+    "protocol",
+    "devtools",
+    "telemetry"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "typecheck": "tsc --noEmit --strict",
+    "prepublishOnly": "npm run typecheck && npm run build"
+  }
+}

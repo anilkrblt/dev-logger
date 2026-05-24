@@ -1,0 +1,1032 @@
+import {
+  SafeReact,
+  getComputedStyle,
+  getNodeName,
+  isHTMLElement,
+  isShadowRoot
+} from "/node_modules/.vite/deps/chunk-TUM2D73N.js?v=5fc084ca";
+import {
+  useRefWithInit
+} from "/node_modules/.vite/deps/chunk-U5NCODHT.js?v=5fc084ca";
+import {
+  require_react
+} from "/node_modules/.vite/deps/chunk-F6FOSZAI.js?v=5fc084ca";
+import {
+  __publicField,
+  __toESM
+} from "/node_modules/.vite/deps/chunk-WOOG5QLI.js?v=5fc084ca";
+
+// node_modules/@base-ui/utils/esm/useId.js
+var React = __toESM(require_react());
+var globalId = 0;
+function useGlobalId(idOverride, prefix = "mui") {
+  const [defaultId, setDefaultId] = React.useState(idOverride);
+  const id = idOverride || defaultId;
+  React.useEffect(() => {
+    if (defaultId == null) {
+      globalId += 1;
+      setDefaultId(`${prefix}-${globalId}`);
+    }
+  }, [defaultId, prefix]);
+  return id;
+}
+var maybeReactUseId = SafeReact.useId;
+function useId(idOverride, prefix) {
+  if (maybeReactUseId !== void 0) {
+    const reactId = maybeReactUseId();
+    return idOverride ?? (prefix ? `${prefix}-${reactId}` : reactId);
+  }
+  return useGlobalId(idOverride, prefix);
+}
+
+// node_modules/@base-ui/react/esm/internals/useBaseUiId.js
+function useBaseUiId(idOverride) {
+  return useId(idOverride, "base-ui");
+}
+
+// node_modules/@base-ui/utils/esm/owner.js
+function ownerDocument(node) {
+  return (node == null ? void 0 : node.ownerDocument) || document;
+}
+
+// node_modules/@base-ui/utils/esm/detectBrowser.js
+var hasNavigator = typeof navigator !== "undefined";
+var nav = getNavigatorData();
+var platform = getPlatform();
+var userAgent = getUserAgent();
+var isWebKit = typeof CSS === "undefined" || !CSS.supports ? false : CSS.supports("-webkit-backdrop-filter:none");
+var isIOS = (
+  // iPads can claim to be MacIntel
+  nav.platform === "MacIntel" && nav.maxTouchPoints > 1 ? true : /iP(hone|ad|od)|iOS/.test(nav.platform)
+);
+var isFirefox = hasNavigator && /firefox/i.test(userAgent);
+var isSafari = hasNavigator && /apple/i.test(navigator.vendor);
+var isEdge = hasNavigator && /Edg/i.test(userAgent);
+var isAndroid = hasNavigator && /android/i.test(platform) || /android/i.test(userAgent);
+var isMac = hasNavigator && platform.toLowerCase().startsWith("mac") && !navigator.maxTouchPoints;
+var isJSDOM = userAgent.includes("jsdom/");
+function getNavigatorData() {
+  if (!hasNavigator) {
+    return {
+      platform: "",
+      maxTouchPoints: -1
+    };
+  }
+  const uaData = navigator.userAgentData;
+  if (uaData == null ? void 0 : uaData.platform) {
+    return {
+      platform: uaData.platform,
+      maxTouchPoints: navigator.maxTouchPoints
+    };
+  }
+  return {
+    platform: navigator.platform ?? "",
+    maxTouchPoints: navigator.maxTouchPoints ?? -1
+  };
+}
+function getUserAgent() {
+  if (!hasNavigator) {
+    return "";
+  }
+  const uaData = navigator.userAgentData;
+  if (uaData && Array.isArray(uaData.brands)) {
+    return uaData.brands.map(({
+      brand,
+      version
+    }) => `${brand}/${version}`).join(" ");
+  }
+  return navigator.userAgent;
+}
+function getPlatform() {
+  if (!hasNavigator) {
+    return "";
+  }
+  const uaData = navigator.userAgentData;
+  if (uaData == null ? void 0 : uaData.platform) {
+    return uaData.platform;
+  }
+  return navigator.platform ?? "";
+}
+
+// node_modules/@base-ui/react/esm/internals/shadowDom.js
+function activeElement(doc) {
+  var _a;
+  let element = doc.activeElement;
+  while (((_a = element == null ? void 0 : element.shadowRoot) == null ? void 0 : _a.activeElement) != null) {
+    element = element.shadowRoot.activeElement;
+  }
+  return element;
+}
+function contains(parent, child) {
+  var _a;
+  if (!parent || !child) {
+    return false;
+  }
+  const rootNode = (_a = child.getRootNode) == null ? void 0 : _a.call(child);
+  if (parent.contains(child)) {
+    return true;
+  }
+  if (rootNode && isShadowRoot(rootNode)) {
+    let next = child;
+    while (next) {
+      if (parent === next) {
+        return true;
+      }
+      next = next.parentNode || next.host;
+    }
+  }
+  return false;
+}
+function getTarget(event) {
+  if ("composedPath" in event) {
+    return event.composedPath()[0];
+  }
+  return event.target;
+}
+
+// node_modules/@base-ui/react/esm/floating-ui-react/utils/constants.js
+var FOCUSABLE_ATTRIBUTE = "data-base-ui-focusable";
+var ACTIVE_KEY = "active";
+var SELECTED_KEY = "selected";
+var TYPEABLE_SELECTOR = "input:not([type='hidden']):not([disabled]),[contenteditable]:not([contenteditable='false']),textarea:not([disabled])";
+var ARROW_LEFT = "ArrowLeft";
+var ARROW_RIGHT = "ArrowRight";
+var ARROW_UP = "ArrowUp";
+var ARROW_DOWN = "ArrowDown";
+
+// node_modules/@base-ui/react/esm/floating-ui-react/utils/element.js
+function isEventTargetWithin(event, node) {
+  if (node == null) {
+    return false;
+  }
+  if ("composedPath" in event) {
+    return event.composedPath().includes(node);
+  }
+  const eventAgain = event;
+  return eventAgain.target != null && node.contains(eventAgain.target);
+}
+function isRootElement(element) {
+  return element.matches("html,body");
+}
+function isTypeableElement(element) {
+  return isHTMLElement(element) && element.matches(TYPEABLE_SELECTOR);
+}
+function isTypeableCombobox(element) {
+  if (!element) {
+    return false;
+  }
+  return element.getAttribute("role") === "combobox" && isTypeableElement(element);
+}
+function getFloatingFocusElement(floatingElement) {
+  if (!floatingElement) {
+    return null;
+  }
+  return floatingElement.hasAttribute(FOCUSABLE_ATTRIBUTE) ? floatingElement : floatingElement.querySelector(`[${FOCUSABLE_ATTRIBUTE}]`) || floatingElement;
+}
+
+// node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs
+var sides = ["top", "right", "bottom", "left"];
+var alignments = ["start", "end"];
+var placements = sides.reduce((acc, side) => acc.concat(side, side + "-" + alignments[0], side + "-" + alignments[1]), []);
+var min = Math.min;
+var max = Math.max;
+var round = Math.round;
+var floor = Math.floor;
+var createCoords = (v) => ({
+  x: v,
+  y: v
+});
+var oppositeSideMap = {
+  left: "right",
+  right: "left",
+  bottom: "top",
+  top: "bottom"
+};
+function clamp(start, value, end) {
+  return max(start, min(value, end));
+}
+function evaluate(value, param) {
+  return typeof value === "function" ? value(param) : value;
+}
+function getSide(placement) {
+  return placement.split("-")[0];
+}
+function getAlignment(placement) {
+  return placement.split("-")[1];
+}
+function getOppositeAxis(axis) {
+  return axis === "x" ? "y" : "x";
+}
+function getAxisLength(axis) {
+  return axis === "y" ? "height" : "width";
+}
+function getSideAxis(placement) {
+  const firstChar = placement[0];
+  return firstChar === "t" || firstChar === "b" ? "y" : "x";
+}
+function getAlignmentAxis(placement) {
+  return getOppositeAxis(getSideAxis(placement));
+}
+function getAlignmentSides(placement, rects, rtl) {
+  if (rtl === void 0) {
+    rtl = false;
+  }
+  const alignment = getAlignment(placement);
+  const alignmentAxis = getAlignmentAxis(placement);
+  const length = getAxisLength(alignmentAxis);
+  let mainAlignmentSide = alignmentAxis === "x" ? alignment === (rtl ? "end" : "start") ? "right" : "left" : alignment === "start" ? "bottom" : "top";
+  if (rects.reference[length] > rects.floating[length]) {
+    mainAlignmentSide = getOppositePlacement(mainAlignmentSide);
+  }
+  return [mainAlignmentSide, getOppositePlacement(mainAlignmentSide)];
+}
+function getExpandedPlacements(placement) {
+  const oppositePlacement = getOppositePlacement(placement);
+  return [getOppositeAlignmentPlacement(placement), oppositePlacement, getOppositeAlignmentPlacement(oppositePlacement)];
+}
+function getOppositeAlignmentPlacement(placement) {
+  return placement.includes("start") ? placement.replace("start", "end") : placement.replace("end", "start");
+}
+var lrPlacement = ["left", "right"];
+var rlPlacement = ["right", "left"];
+var tbPlacement = ["top", "bottom"];
+var btPlacement = ["bottom", "top"];
+function getSideList(side, isStart, rtl) {
+  switch (side) {
+    case "top":
+    case "bottom":
+      if (rtl) return isStart ? rlPlacement : lrPlacement;
+      return isStart ? lrPlacement : rlPlacement;
+    case "left":
+    case "right":
+      return isStart ? tbPlacement : btPlacement;
+    default:
+      return [];
+  }
+}
+function getOppositeAxisPlacements(placement, flipAlignment, direction, rtl) {
+  const alignment = getAlignment(placement);
+  let list = getSideList(getSide(placement), direction === "start", rtl);
+  if (alignment) {
+    list = list.map((side) => side + "-" + alignment);
+    if (flipAlignment) {
+      list = list.concat(list.map(getOppositeAlignmentPlacement));
+    }
+  }
+  return list;
+}
+function getOppositePlacement(placement) {
+  const side = getSide(placement);
+  return oppositeSideMap[side] + placement.slice(side.length);
+}
+function expandPaddingObject(padding) {
+  return {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    ...padding
+  };
+}
+function getPaddingObject(padding) {
+  return typeof padding !== "number" ? expandPaddingObject(padding) : {
+    top: padding,
+    right: padding,
+    bottom: padding,
+    left: padding
+  };
+}
+function rectToClientRect(rect) {
+  const {
+    x,
+    y,
+    width,
+    height
+  } = rect;
+  return {
+    width,
+    height,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    x,
+    y
+  };
+}
+
+// node_modules/@base-ui/react/esm/floating-ui-react/utils/nodes.js
+function getNodeChildren(nodes, id, onlyOpenChildren = true) {
+  const directChildren = nodes.filter((node) => node.parentId === id);
+  return directChildren.flatMap((child) => {
+    var _a;
+    return [...!onlyOpenChildren || ((_a = child.context) == null ? void 0 : _a.open) ? [child] : [], ...getNodeChildren(nodes, child.id, onlyOpenChildren)];
+  });
+}
+function getNodeAncestors(nodes, id) {
+  var _a;
+  let allAncestors = [];
+  let currentParentId = (_a = nodes.find((node) => node.id === id)) == null ? void 0 : _a.parentId;
+  while (currentParentId) {
+    const currentNode = nodes.find((node) => node.id === currentParentId);
+    currentParentId = currentNode == null ? void 0 : currentNode.parentId;
+    if (currentNode) {
+      allAncestors = allAncestors.concat(currentNode);
+    }
+  }
+  return allAncestors;
+}
+
+// node_modules/@base-ui/react/esm/floating-ui-react/utils/event.js
+function stopEvent(event) {
+  event.preventDefault();
+  event.stopPropagation();
+}
+function isReactEvent(event) {
+  return "nativeEvent" in event;
+}
+function isVirtualClick(event) {
+  if (event.pointerType === "" && event.isTrusted) {
+    return true;
+  }
+  if (isAndroid && event.pointerType) {
+    return event.type === "click" && event.buttons === 1;
+  }
+  return event.detail === 0 && !event.pointerType;
+}
+function isVirtualPointerEvent(event) {
+  if (isJSDOM) {
+    return false;
+  }
+  return !isAndroid && event.width === 0 && event.height === 0 || isAndroid && event.width === 1 && event.height === 1 && event.pressure === 0 && event.detail === 0 && event.pointerType === "mouse" || // iOS VoiceOver returns 0.333• for width/height.
+  event.width < 1 && event.height < 1 && event.pressure === 0 && event.detail === 0 && event.pointerType === "touch";
+}
+function isMouseLikePointerType(pointerType, strict) {
+  const values = ["mouse", "pen"];
+  if (!strict) {
+    values.push("", void 0);
+  }
+  return values.includes(pointerType);
+}
+function isClickLikeEvent(event) {
+  const type = event.type;
+  return type === "click" || type === "mousedown" || type === "keydown" || type === "keyup";
+}
+
+// node_modules/@base-ui/react/esm/floating-ui-react/utils/composite.js
+function isDifferentGridRow(index, cols, prevRow) {
+  return Math.floor(index / cols) !== prevRow;
+}
+function isIndexOutOfListBounds(list, index) {
+  return index < 0 || index >= list.length;
+}
+function getMinListIndex(listRef, disabledIndices) {
+  return findNonDisabledListIndex(listRef.current, {
+    disabledIndices
+  });
+}
+function getMaxListIndex(listRef, disabledIndices) {
+  return findNonDisabledListIndex(listRef.current, {
+    decrement: true,
+    startingIndex: listRef.current.length,
+    disabledIndices
+  });
+}
+function findNonDisabledListIndex(list, {
+  startingIndex = -1,
+  decrement = false,
+  disabledIndices,
+  amount = 1
+} = {}) {
+  let index = startingIndex;
+  do {
+    index += decrement ? -amount : amount;
+  } while (index >= 0 && index <= list.length - 1 && isListIndexDisabled(list, index, disabledIndices));
+  return index;
+}
+function getGridNavigatedIndex(list, {
+  event,
+  orientation,
+  loopFocus,
+  onLoop,
+  rtl,
+  cols,
+  disabledIndices,
+  minIndex,
+  maxIndex,
+  prevIndex,
+  stopEvent: stop = false
+}) {
+  let nextIndex = prevIndex;
+  let verticalDirection;
+  if (event.key === ARROW_UP) {
+    verticalDirection = "up";
+  } else if (event.key === ARROW_DOWN) {
+    verticalDirection = "down";
+  }
+  if (verticalDirection) {
+    const rows = [];
+    const rowIndexMap = [];
+    let hasRoleRow = false;
+    let visibleItemCount = 0;
+    {
+      let currentRowEl = null;
+      let currentRowIndex = -1;
+      list.forEach((el, idx) => {
+        if (el == null) {
+          return;
+        }
+        visibleItemCount += 1;
+        const rowEl = el.closest('[role="row"]');
+        if (rowEl) {
+          hasRoleRow = true;
+        }
+        if (rowEl !== currentRowEl || currentRowIndex === -1) {
+          currentRowEl = rowEl;
+          currentRowIndex += 1;
+          rows[currentRowIndex] = [];
+        }
+        rows[currentRowIndex].push(idx);
+        rowIndexMap[idx] = currentRowIndex;
+      });
+    }
+    let hasDomRows = false;
+    let inferredDomCols = 0;
+    if (hasRoleRow) {
+      for (const row of rows) {
+        const rowLength = row.length;
+        if (rowLength > inferredDomCols) {
+          inferredDomCols = rowLength;
+        }
+        if (rowLength !== cols) {
+          hasDomRows = true;
+        }
+      }
+    }
+    const hasVirtualizedGaps = hasDomRows && visibleItemCount < list.length;
+    const verticalCols = inferredDomCols || cols;
+    const navigateVertically = (direction) => {
+      if (!hasDomRows || prevIndex === -1) {
+        return void 0;
+      }
+      const currentRow = rowIndexMap[prevIndex];
+      if (currentRow == null) {
+        return void 0;
+      }
+      const colInRow = rows[currentRow].indexOf(prevIndex);
+      const step = direction === "up" ? -1 : 1;
+      for (let nextRow = currentRow + step, i = 0; i < rows.length; i += 1, nextRow += step) {
+        if (nextRow < 0 || nextRow >= rows.length) {
+          if (!loopFocus || hasVirtualizedGaps) {
+            return void 0;
+          }
+          nextRow = nextRow < 0 ? rows.length - 1 : 0;
+          if (onLoop) {
+            const clampedCol = Math.min(colInRow, rows[nextRow].length - 1);
+            const targetItemIndex = rows[nextRow][clampedCol] ?? rows[nextRow][0];
+            const returnedItemIndex = onLoop(event, prevIndex, targetItemIndex);
+            nextRow = rowIndexMap[returnedItemIndex] ?? nextRow;
+          }
+        }
+        const targetRow = rows[nextRow];
+        for (let col = Math.min(colInRow, targetRow.length - 1); col >= 0; col -= 1) {
+          const candidate = targetRow[col];
+          if (!isListIndexDisabled(list, candidate, disabledIndices)) {
+            return candidate;
+          }
+        }
+      }
+      return void 0;
+    };
+    const navigateVerticallyWithInferredRows = (direction) => {
+      if (!hasVirtualizedGaps || prevIndex === -1) {
+        return void 0;
+      }
+      const colInRow = prevIndex % verticalCols;
+      const rowStep = direction === "up" ? -verticalCols : verticalCols;
+      const lastRowStart = maxIndex - maxIndex % verticalCols;
+      const rowCount = floor(maxIndex / verticalCols) + 1;
+      for (let rowStart = prevIndex - colInRow + rowStep, i = 0; i < rowCount; i += 1, rowStart += rowStep) {
+        if (rowStart < 0 || rowStart > maxIndex) {
+          if (!loopFocus) {
+            return void 0;
+          }
+          rowStart = rowStart < 0 ? lastRowStart : 0;
+        }
+        const rowEnd = Math.min(rowStart + verticalCols - 1, maxIndex);
+        for (let candidate = Math.min(rowStart + colInRow, rowEnd); candidate >= rowStart; candidate -= 1) {
+          if (!isListIndexDisabled(list, candidate, disabledIndices)) {
+            return candidate;
+          }
+        }
+      }
+      return void 0;
+    };
+    if (stop) {
+      stopEvent(event);
+    }
+    const verticalCandidate = navigateVertically(verticalDirection) ?? navigateVerticallyWithInferredRows(verticalDirection);
+    if (verticalCandidate !== void 0) {
+      nextIndex = verticalCandidate;
+    } else if (prevIndex === -1) {
+      nextIndex = verticalDirection === "up" ? maxIndex : minIndex;
+    } else {
+      nextIndex = findNonDisabledListIndex(list, {
+        startingIndex: prevIndex,
+        amount: verticalCols,
+        decrement: verticalDirection === "up",
+        disabledIndices
+      });
+      if (loopFocus) {
+        if (verticalDirection === "up" && (prevIndex - verticalCols < minIndex || nextIndex < 0)) {
+          const col = prevIndex % verticalCols;
+          const maxCol = maxIndex % verticalCols;
+          const offset = maxIndex - (maxCol - col);
+          if (maxCol === col) {
+            nextIndex = maxIndex;
+          } else {
+            nextIndex = maxCol > col ? offset : offset - verticalCols;
+          }
+          if (onLoop) {
+            nextIndex = onLoop(event, prevIndex, nextIndex);
+          }
+        }
+        if (verticalDirection === "down" && prevIndex + verticalCols > maxIndex) {
+          nextIndex = findNonDisabledListIndex(list, {
+            startingIndex: prevIndex % verticalCols - verticalCols,
+            amount: verticalCols,
+            disabledIndices
+          });
+          if (onLoop) {
+            nextIndex = onLoop(event, prevIndex, nextIndex);
+          }
+        }
+      }
+    }
+    if (isIndexOutOfListBounds(list, nextIndex)) {
+      nextIndex = prevIndex;
+    }
+  }
+  if (orientation === "both") {
+    const prevRow = floor(prevIndex / cols);
+    if (event.key === (rtl ? ARROW_LEFT : ARROW_RIGHT)) {
+      if (stop) {
+        stopEvent(event);
+      }
+      if (prevIndex % cols !== cols - 1) {
+        nextIndex = findNonDisabledListIndex(list, {
+          startingIndex: prevIndex,
+          disabledIndices
+        });
+        if (loopFocus && isDifferentGridRow(nextIndex, cols, prevRow)) {
+          nextIndex = findNonDisabledListIndex(list, {
+            startingIndex: prevIndex - prevIndex % cols - 1,
+            disabledIndices
+          });
+          if (onLoop) {
+            nextIndex = onLoop(event, prevIndex, nextIndex);
+          }
+        }
+      } else if (loopFocus) {
+        nextIndex = findNonDisabledListIndex(list, {
+          startingIndex: prevIndex - prevIndex % cols - 1,
+          disabledIndices
+        });
+        if (onLoop) {
+          nextIndex = onLoop(event, prevIndex, nextIndex);
+        }
+      }
+      if (isDifferentGridRow(nextIndex, cols, prevRow)) {
+        nextIndex = prevIndex;
+      }
+    }
+    if (event.key === (rtl ? ARROW_RIGHT : ARROW_LEFT)) {
+      if (stop) {
+        stopEvent(event);
+      }
+      if (prevIndex % cols !== 0) {
+        nextIndex = findNonDisabledListIndex(list, {
+          startingIndex: prevIndex,
+          decrement: true,
+          disabledIndices
+        });
+        if (loopFocus && isDifferentGridRow(nextIndex, cols, prevRow)) {
+          nextIndex = findNonDisabledListIndex(list, {
+            startingIndex: prevIndex + (cols - prevIndex % cols),
+            decrement: true,
+            disabledIndices
+          });
+          if (onLoop) {
+            nextIndex = onLoop(event, prevIndex, nextIndex);
+          }
+        }
+      } else if (loopFocus) {
+        nextIndex = findNonDisabledListIndex(list, {
+          startingIndex: prevIndex + (cols - prevIndex % cols),
+          decrement: true,
+          disabledIndices
+        });
+        if (onLoop) {
+          nextIndex = onLoop(event, prevIndex, nextIndex);
+        }
+      }
+      if (isDifferentGridRow(nextIndex, cols, prevRow)) {
+        nextIndex = prevIndex;
+      }
+    }
+    const lastRow = floor(maxIndex / cols) === prevRow;
+    if (isIndexOutOfListBounds(list, nextIndex)) {
+      if (loopFocus && lastRow) {
+        nextIndex = event.key === (rtl ? ARROW_RIGHT : ARROW_LEFT) ? maxIndex : findNonDisabledListIndex(list, {
+          startingIndex: prevIndex - prevIndex % cols - 1,
+          disabledIndices
+        });
+        if (onLoop) {
+          nextIndex = onLoop(event, prevIndex, nextIndex);
+        }
+      } else {
+        nextIndex = prevIndex;
+      }
+    }
+  }
+  return nextIndex;
+}
+function createGridCellMap(sizes, cols, dense) {
+  const cellMap = [];
+  let startIndex = 0;
+  sizes.forEach(({
+    width,
+    height
+  }, index) => {
+    if (width > cols) {
+      if (true) {
+        throw new Error(`[Floating UI]: Invalid grid - item width at index ${index} is greater than grid columns`);
+      }
+    }
+    let itemPlaced = false;
+    if (dense) {
+      startIndex = 0;
+    }
+    while (!itemPlaced) {
+      const targetCells = [];
+      for (let i = 0; i < width; i += 1) {
+        for (let j = 0; j < height; j += 1) {
+          targetCells.push(startIndex + i + j * cols);
+        }
+      }
+      if (startIndex % cols + width <= cols && targetCells.every((cell) => cellMap[cell] == null)) {
+        targetCells.forEach((cell) => {
+          cellMap[cell] = index;
+        });
+        itemPlaced = true;
+      } else {
+        startIndex += 1;
+      }
+    }
+  });
+  return [...cellMap];
+}
+function getGridCellIndexOfCorner(index, sizes, cellMap, cols, corner) {
+  if (index === -1) {
+    return -1;
+  }
+  const firstCellIndex = cellMap.indexOf(index);
+  const sizeItem = sizes[index];
+  switch (corner) {
+    case "tl":
+      return firstCellIndex;
+    case "tr":
+      if (!sizeItem) {
+        return firstCellIndex;
+      }
+      return firstCellIndex + sizeItem.width - 1;
+    case "bl":
+      if (!sizeItem) {
+        return firstCellIndex;
+      }
+      return firstCellIndex + (sizeItem.height - 1) * cols;
+    case "br":
+      return cellMap.lastIndexOf(index);
+    default:
+      return -1;
+  }
+}
+function getGridCellIndices(indices, cellMap) {
+  return cellMap.flatMap((index, cellIndex) => indices.includes(index) ? [cellIndex] : []);
+}
+function isListIndexDisabled(list, index, disabledIndices) {
+  const isExplicitlyDisabled = typeof disabledIndices === "function" ? disabledIndices(index) : (disabledIndices == null ? void 0 : disabledIndices.includes(index)) ?? false;
+  if (isExplicitlyDisabled) {
+    return true;
+  }
+  const element = list[index];
+  if (!element) {
+    return false;
+  }
+  if (!isElementVisible(element)) {
+    return true;
+  }
+  return !disabledIndices && (element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true");
+}
+function isHiddenByStyles(styles) {
+  return styles.visibility === "hidden" || styles.visibility === "collapse";
+}
+function isElementVisible(element, styles = element ? getComputedStyle(element) : null) {
+  if (!element || !element.isConnected || !styles || isHiddenByStyles(styles)) {
+    return false;
+  }
+  if (typeof element.checkVisibility === "function") {
+    return element.checkVisibility();
+  }
+  return styles.display !== "none" && styles.display !== "contents";
+}
+
+// node_modules/@base-ui/react/esm/floating-ui-react/utils/tabbable.js
+var CANDIDATE_SELECTOR = 'a[href],button,input,select,textarea,summary,details,iframe,object,embed,[tabindex],[contenteditable]:not([contenteditable="false"]),audio[controls],video[controls]';
+function getParentElement(element) {
+  const assignedSlot = element.assignedSlot;
+  if (assignedSlot) {
+    return assignedSlot;
+  }
+  if (element.parentElement) {
+    return element.parentElement;
+  }
+  const rootNode = element.getRootNode();
+  return isShadowRoot(rootNode) ? rootNode.host : null;
+}
+function getDetailsSummary(details) {
+  for (const child of Array.from(details.children)) {
+    if (getNodeName(child) === "summary") {
+      return child;
+    }
+  }
+  return null;
+}
+function isWithinOpenDetailsSummary(element, details) {
+  const summary = getDetailsSummary(details);
+  return !!summary && (element === summary || contains(summary, element));
+}
+function isFocusableCandidate(element) {
+  const nodeName = element ? getNodeName(element) : "";
+  return element != null && element.matches(CANDIDATE_SELECTOR) && (nodeName !== "summary" || element.parentElement != null && getNodeName(element.parentElement) === "details" && getDetailsSummary(element.parentElement) === element) && (nodeName !== "details" || getDetailsSummary(element) == null) && (nodeName !== "input" || element.type !== "hidden");
+}
+function isFocusableElement(element) {
+  if (!isFocusableCandidate(element) || !element.isConnected || element.matches(":disabled")) {
+    return false;
+  }
+  for (let current = element; current; current = getParentElement(current)) {
+    const isAncestor = current !== element;
+    const isSlot = getNodeName(current) === "slot";
+    if (current.hasAttribute("inert")) {
+      return false;
+    }
+    if (isAncestor && getNodeName(current) === "details" && !current.open && !isWithinOpenDetailsSummary(element, current) || current.hasAttribute("hidden") || !isSlot && !isVisibleInTabbableTree(current, isAncestor)) {
+      return false;
+    }
+  }
+  return true;
+}
+function isVisibleInTabbableTree(element, isAncestor) {
+  const styles = getComputedStyle(element);
+  if (!isAncestor) {
+    return isElementVisible(element, styles);
+  }
+  return styles.display !== "none";
+}
+function getTabIndex(element) {
+  const tabIndex = element.tabIndex;
+  if (tabIndex < 0) {
+    const nodeName = getNodeName(element);
+    if (nodeName === "details" || nodeName === "audio" || nodeName === "video" || isHTMLElement(element) && element.isContentEditable) {
+      return 0;
+    }
+  }
+  return tabIndex;
+}
+function getNamedRadioInput(element) {
+  if (getNodeName(element) !== "input") {
+    return null;
+  }
+  const input = element;
+  return input.type === "radio" && input.name !== "" ? input : null;
+}
+function isTabbableRadio(element, candidates) {
+  const input = getNamedRadioInput(element);
+  if (!input) {
+    return true;
+  }
+  const checkedRadio = candidates.find((candidate) => {
+    const radio = getNamedRadioInput(candidate);
+    return (radio == null ? void 0 : radio.name) === input.name && radio.form === input.form && radio.checked;
+  });
+  if (checkedRadio) {
+    return checkedRadio === input;
+  }
+  return candidates.find((candidate) => {
+    const radio = getNamedRadioInput(candidate);
+    return (radio == null ? void 0 : radio.name) === input.name && radio.form === input.form;
+  }) === input;
+}
+function getComposedChildren(container) {
+  if (isHTMLElement(container) && getNodeName(container) === "slot") {
+    const assignedElements = container.assignedElements({
+      flatten: true
+    });
+    if (assignedElements.length > 0) {
+      return assignedElements;
+    }
+  }
+  if (isHTMLElement(container) && container.shadowRoot) {
+    return Array.from(container.shadowRoot.children);
+  }
+  return Array.from(container.children);
+}
+function appendCandidates(container, list) {
+  getComposedChildren(container).forEach((child) => {
+    if (isFocusableCandidate(child)) {
+      list.push(child);
+    }
+    appendCandidates(child, list);
+  });
+}
+function appendMatchingElements(container, selector, list) {
+  getComposedChildren(container).forEach((child) => {
+    if (isHTMLElement(child) && child.matches(selector)) {
+      list.push(child);
+    }
+    appendMatchingElements(child, selector, list);
+  });
+}
+function isTabbable(element) {
+  return isFocusableElement(element) && getTabIndex(element) >= 0;
+}
+function focusable(container) {
+  const candidates = [];
+  appendCandidates(container, candidates);
+  return candidates.filter(isFocusableElement);
+}
+function tabbable(container) {
+  const candidates = focusable(container);
+  return candidates.filter((element) => getTabIndex(element) >= 0 && isTabbableRadio(element, candidates));
+}
+function getTabbableIn(container, dir) {
+  const list = tabbable(container);
+  const len = list.length;
+  if (len === 0) {
+    return void 0;
+  }
+  const active = activeElement(ownerDocument(container));
+  const index = list.indexOf(active);
+  const nextIndex = index === -1 ? dir === 1 ? 0 : len - 1 : index + dir;
+  return list[nextIndex];
+}
+function getNextTabbable(referenceElement) {
+  return getTabbableIn(ownerDocument(referenceElement).body, 1) || referenceElement;
+}
+function getPreviousTabbable(referenceElement) {
+  return getTabbableIn(ownerDocument(referenceElement).body, -1) || referenceElement;
+}
+function isOutsideEvent(event, container) {
+  const containerElement = container || event.currentTarget;
+  const relatedTarget = event.relatedTarget;
+  return !relatedTarget || !contains(containerElement, relatedTarget);
+}
+function disableFocusInside(container) {
+  const tabbableElements = tabbable(container);
+  tabbableElements.forEach((element) => {
+    element.dataset.tabindex = element.getAttribute("tabindex") || "";
+    element.setAttribute("tabindex", "-1");
+  });
+}
+function enableFocusInside(container) {
+  const elements = [];
+  appendMatchingElements(container, "[data-tabindex]", elements);
+  elements.forEach((element) => {
+    const tabindex = element.dataset.tabindex;
+    delete element.dataset.tabindex;
+    if (tabindex) {
+      element.setAttribute("tabindex", tabindex);
+    } else {
+      element.removeAttribute("tabindex");
+    }
+  });
+}
+
+// node_modules/@base-ui/utils/esm/useOnMount.js
+var React2 = __toESM(require_react(), 1);
+var EMPTY = [];
+function useOnMount(fn) {
+  React2.useEffect(fn, EMPTY);
+}
+
+// node_modules/@base-ui/utils/esm/useTimeout.js
+var EMPTY2 = 0;
+var Timeout = class _Timeout {
+  constructor() {
+    __publicField(this, "currentId", EMPTY2);
+    __publicField(this, "clear", () => {
+      if (this.currentId !== EMPTY2) {
+        clearTimeout(this.currentId);
+        this.currentId = EMPTY2;
+      }
+    });
+    __publicField(this, "disposeEffect", () => {
+      return this.clear;
+    });
+  }
+  static create() {
+    return new _Timeout();
+  }
+  /**
+   * Executes `fn` after `delay`, clearing any previously scheduled call.
+   */
+  start(delay, fn) {
+    this.clear();
+    this.currentId = setTimeout(() => {
+      this.currentId = EMPTY2;
+      fn();
+    }, delay);
+  }
+  isStarted() {
+    return this.currentId !== EMPTY2;
+  }
+};
+function useTimeout() {
+  const timeout = useRefWithInit(Timeout.create).current;
+  useOnMount(timeout.disposeEffect);
+  return timeout;
+}
+
+export {
+  useId,
+  useBaseUiId,
+  ownerDocument,
+  isWebKit,
+  isIOS,
+  isSafari,
+  FOCUSABLE_ATTRIBUTE,
+  ACTIVE_KEY,
+  SELECTED_KEY,
+  ARROW_LEFT,
+  ARROW_RIGHT,
+  ARROW_UP,
+  ARROW_DOWN,
+  activeElement,
+  contains,
+  getTarget,
+  isEventTargetWithin,
+  isRootElement,
+  isTypeableElement,
+  isTypeableCombobox,
+  getFloatingFocusElement,
+  getNodeChildren,
+  getNodeAncestors,
+  stopEvent,
+  isReactEvent,
+  isVirtualClick,
+  isVirtualPointerEvent,
+  isMouseLikePointerType,
+  isClickLikeEvent,
+  sides,
+  min,
+  max,
+  round,
+  floor,
+  createCoords,
+  clamp,
+  evaluate,
+  getSide,
+  getAlignment,
+  getOppositeAxis,
+  getAxisLength,
+  getSideAxis,
+  getAlignmentAxis,
+  getAlignmentSides,
+  getExpandedPlacements,
+  getOppositeAxisPlacements,
+  getOppositePlacement,
+  getPaddingObject,
+  rectToClientRect,
+  isIndexOutOfListBounds,
+  getMinListIndex,
+  getMaxListIndex,
+  findNonDisabledListIndex,
+  getGridNavigatedIndex,
+  createGridCellMap,
+  getGridCellIndexOfCorner,
+  getGridCellIndices,
+  isListIndexDisabled,
+  isElementVisible,
+  isTabbable,
+  focusable,
+  tabbable,
+  getNextTabbable,
+  getPreviousTabbable,
+  isOutsideEvent,
+  disableFocusInside,
+  enableFocusInside,
+  useOnMount,
+  Timeout,
+  useTimeout
+};
+//# sourceMappingURL=chunk-MWNY4B5A.js.map
