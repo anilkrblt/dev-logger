@@ -386,7 +386,13 @@ function readBrowserRouteContext(): CurrentRouteContext | undefined {
     return undefined;
   }
 
-  const path = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const location = window.location;
+
+  if (!location) {
+    return undefined;
+  }
+
+  const path = `${location.pathname ?? "/"}${location.search ?? ""}${location.hash ?? ""}`;
 
   return {
     path,

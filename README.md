@@ -71,6 +71,14 @@ Start the terminal agent:
 npx @anilkrblt/cli
 ```
 
+By default the CLI binds to `0.0.0.0` so browser apps, Android emulators, and physical mobile devices can reach it during development. Bind explicitly when you need a narrower or fixed interface:
+
+```bash
+npx @anilkrblt/cli --host localhost
+npx @anilkrblt/cli --host 0.0.0.0 --profile all
+npx @anilkrblt/cli --host 192.168.1.25 --port 3799
+```
+
 Run with a fixed version and capture profile:
 
 ```bash
@@ -80,6 +88,7 @@ npx @anilkrblt/cli@0.1.0 --profile all
 Useful CLI flags:
 
 ```bash
+npx @anilkrblt/cli --host 0.0.0.0 --port 3799 --profile all
 npx @anilkrblt/cli --port 3799 --profile network
 npx @anilkrblt/cli --profile routes
 npx @anilkrblt/cli --profile errors --filter api.example.com
@@ -351,7 +360,23 @@ export default function App() {
 
 ### Mobile Network Note
 
-On a physical device or emulator, `localhost` usually points to the device, not your development machine. Run the CLI on your computer and pass your computer's LAN IP address to the runtime:
+For mobile development, start the CLI on an interface the device can reach:
+
+```bash
+npx @anilkrblt/cli --host 0.0.0.0 --profile all
+```
+
+Use the runtime host that matches your target:
+
+| Target | Runtime host | CLI requirement |
+| --- | --- | --- |
+| Web browser | `host="localhost"` | Any normal local CLI bind works. |
+| iOS simulator | `host="localhost"` | Any normal local CLI bind works. |
+| Android emulator | `host="10.0.2.2"` | Start CLI with `--host 0.0.0.0`. |
+| Android USB device | `host="localhost"` | Run `adb reverse tcp:3799 tcp:3799` first. |
+| Physical device Wi-Fi | `host="<LAN_IP>"` | Start CLI with `--host 0.0.0.0` or `--host <LAN_IP>`. |
+
+Physical-device example:
 
 ```tsx
 <ReactLogAgent
@@ -367,6 +392,43 @@ On a physical device or emulator, `localhost` usually points to the device, not 
 ```
 
 Use the IP shown by your operating system for the active Wi-Fi or Ethernet interface, and make sure the device and computer are on the same network.
+
+### Expo Environment Setup
+
+Expo apps can keep the runtime host outside source code with an Expo public environment variable:
+
+```bash
+EXPO_PUBLIC_REACT_LOG_AGENT_HOST=10.0.2.2
+```
+
+```tsx
+<ReactLogAgent
+  enabled={__DEV__}
+  adapters="mobile"
+  navigationRef={navigationRef}
+  appName="Expo App"
+  host={process.env.EXPO_PUBLIC_REACT_LOG_AGENT_HOST ?? "localhost"}
+  port={3799}
+>
+  <NavigationContainer ref={navigationRef}>{/* app */}</NavigationContainer>
+</ReactLogAgent>
+```
+
+Choose the env value per runtime:
+
+- Android emulator: `EXPO_PUBLIC_REACT_LOG_AGENT_HOST=10.0.2.2`
+- iOS simulator: `EXPO_PUBLIC_REACT_LOG_AGENT_HOST=localhost`
+- Physical device Wi-Fi: `EXPO_PUBLIC_REACT_LOG_AGENT_HOST=<LAN_IP>`
+- Android USB with reverse tunnel: `EXPO_PUBLIC_REACT_LOG_AGENT_HOST=localhost`
+
+### Expo Go Troubleshooting
+
+If Expo Go shows "Something went wrong" or the CLI keeps waiting without logs, the app code may be fine and the issue may be host reachability.
+
+- Confirm the CLI says `Listening: ws://0.0.0.0:3799` or is bound to your LAN IP.
+- Confirm the runtime `host` matches the table above for the emulator, simulator, USB device, or physical device.
+- Confirm the Expo dev server connection mode and React Log Agent host are both reachable from the same device/runtime.
+- On Android USB, re-run `adb reverse tcp:3799 tcp:3799` after reconnecting the device.
 
 ## Runtime Status
 

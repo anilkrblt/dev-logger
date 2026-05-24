@@ -44,6 +44,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean --platform node",
+    "test": "tsx test/cli.test.ts",
     "typecheck": "tsc --noEmit --strict",
     "prepublishOnly": "npm run typecheck && npm run build"
   },

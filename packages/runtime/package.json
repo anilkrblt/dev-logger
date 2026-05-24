@@ -45,6 +45,7 @@
   },
   "scripts": {
     "build": "tsup src/index.tsx --format esm,cjs --dts --clean",
+    "test": "tsx test/react-native-compat.test.tsx",
     "typecheck": "tsc --noEmit --strict",
     "prepublishOnly": "npm run typecheck && npm run build"
   },

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
+import { networkInterfaces } from "node:os";
 import process from "node:process";
 import {
   WebSocket,
@@ -20,6 +21,7 @@ import type {
 } from "@anilkrblt/protocol";
 
 const DEFAULT_PORT = 3799;
+const DEFAULT_HOST = "0.0.0.0";
 const DEFAULT_PROFILE: CaptureProfile = "all";
 const DEFAULT_REMOTE_REDACT_RULES = ["authorization", "cookie", "password", "token"] as const;
 const MAX_SNIPPET_LENGTH = 220;
@@ -34,7 +36,8 @@ type CliColor =
   | "blue"
   | "bold";
 
-interface CliOptions {
+export interface CliOptions {
+  host: string;
   port: number;
   profile: CaptureProfile;
   filterPatterns: string[];
@@ -48,7 +51,9 @@ interface ClientSession {
   isAcked: boolean;
 }
 
-main();
+if (process.env.REACT_LOG_AGENT_SKIP_MAIN !== "1") {
+  main();
+}
 
 function main(): void {
   const parsed = parseArgs(process.argv.slice(2));
@@ -112,7 +117,7 @@ function startServer(options: CliOptions): void {
     process.exitCode = 1;
   });
 
-  httpServer.listen(options.port, "localhost", () => {
+  httpServer.listen(options.port, options.host, () => {
     const address = httpServer.address() as AddressInfo;
     printStartup(address.port, options);
   });
@@ -182,20 +187,21 @@ function handleSocketMessage(
   printLogEvent(payload, session);
 }
 
-interface ParsedArgsSuccess {
+export interface ParsedArgsSuccess {
   ok: true;
   help: boolean;
   options: CliOptions;
 }
 
-interface ParsedArgsFailure {
+export interface ParsedArgsFailure {
   ok: false;
   error: string;
 }
 
-type ParsedArgs = ParsedArgsSuccess | ParsedArgsFailure;
+export type ParsedArgs = ParsedArgsSuccess | ParsedArgsFailure;
 
-function parseArgs(argv: string[]): ParsedArgs {
+export function parseArgs(argv: string[]): ParsedArgs {
+  let host = DEFAULT_HOST;
   let port = DEFAULT_PORT;
   let profile: CaptureProfile = DEFAULT_PROFILE;
   const filterPatterns: string[] = [];
@@ -209,13 +215,23 @@ function parseArgs(argv: string[]): ParsedArgs {
       return {
         ok: true,
         help: true,
-        options: createCliOptions(port, profile, filterPatterns, redactRules),
+        options: createCliOptions(host, port, profile, filterPatterns, redactRules),
       };
+    }
+
+    if (arg === "--host") {
+      const value = args[index + 1];
+      if (!value || value.startsWith("--")) {
+        return { ok: false, error: "--host requires a host value." };
+      }
+      host = value;
+      index += 1;
+      continue;
     }
 
     if (arg === "--port") {
       const value = args[index + 1];
-      if (!value) {
+      if (!value || value.startsWith("--")) {
         return { ok: false, error: "--port requires a numeric value." };
       }
       const parsedPort = Number.parseInt(value, 10);
@@ -229,7 +245,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 
     if (arg === "--profile") {
       const value = args[index + 1];
-      if (!value) {
+      if (!value || value.startsWith("--")) {
         return { ok: false, error: "--profile requires a value." };
       }
       if (!isCaptureProfile(value)) {
@@ -245,7 +261,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 
     if (arg === "--filter") {
       const value = args[index + 1];
-      if (!value) {
+      if (!value || value.startsWith("--")) {
         return { ok: false, error: "--filter requires a pattern string." };
       }
       filterPatterns.push(...splitCsv(value));
@@ -255,7 +271,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 
     if (arg === "--redact") {
       const value = args[index + 1];
-      if (!value) {
+      if (!value || value.startsWith("--")) {
         return { ok: false, error: "--redact requires a comma-separated string." };
       }
       redactRules.push(...splitCsv(value));
@@ -269,17 +285,19 @@ function parseArgs(argv: string[]): ParsedArgs {
   return {
     ok: true,
     help: false,
-    options: createCliOptions(port, profile, filterPatterns, redactRules),
+    options: createCliOptions(host, port, profile, filterPatterns, redactRules),
   };
 }
 
 function createCliOptions(
+  host: string,
   port: number,
   profile: CaptureProfile,
   filterPatterns: string[],
   redactRules: string[],
 ): CliOptions {
   return {
+    host,
     port,
     profile,
     filterPatterns: uniqueNonEmpty(filterPatterns),
@@ -482,14 +500,93 @@ function wildcardToRegExp(pattern: string): RegExp {
 }
 
 function printStartup(port: number, options: CliOptions): void {
-  writeLine(color("React Log Agent CLI", "bold"));
-  writeLine(color("=".repeat(58), "dim"));
-  writeLine(`${color("Listening:", "cyan")} ws://localhost:${port}`);
-  writeLine(`${color("Profile:", "cyan")} ${options.profile}`);
-  writeLine(`${color("Filters:", "cyan")} ${options.filterPatterns.length ? options.filterPatterns.join(", ") : "(none)"}`);
-  writeLine(`${color("Remote redact:", "cyan")} ${options.remoteRedactRules.join(", ")}`);
-  writeLine(color("Waiting for React runtime clients...", "dim"));
+  for (const line of formatStartupLines(port, options)) {
+    writeLine(line);
+  }
   writeLine("");
+}
+
+export function formatStartupLines(port: number, options: CliOptions): string[] {
+  const networkUrls = getNetworkUrls(port, options.host);
+  const lines = [
+    color("React Log Agent CLI", "bold"),
+    color("=".repeat(58), "dim"),
+    `${color("Listening:", "cyan")} ${formatWebSocketUrl(options.host, port)}`,
+    `${color("Local:", "cyan")}     ${formatWebSocketUrl("localhost", port)}`,
+    ...formatNetworkLines(networkUrls),
+    `${color("Profile:", "cyan")}   ${options.profile}`,
+    `${color("Filters:", "cyan")}   ${options.filterPatterns.length ? options.filterPatterns.join(", ") : "(none)"}`,
+    `${color("Remote redact:", "cyan")} ${options.remoteRedactRules.join(", ")}`,
+    `${color("Web / iOS simulator:", "cyan")} use runtime host="localhost"`,
+    `${color("Android emulator:", "cyan")}    use runtime host="10.0.2.2"`,
+    `${color("Android USB:", "cyan")}         adb reverse tcp:${port} tcp:${port}, then use runtime host="localhost"`,
+    `${color("Physical Wi-Fi:", "cyan")}      use runtime host="<LAN_IP>" with CLI bound to 0.0.0.0`,
+    `${color("Expo env:", "cyan")}            EXPO_PUBLIC_REACT_LOG_AGENT_HOST=<host>`,
+  ];
+
+  if (isLoopbackHost(options.host)) {
+    lines.push(
+      color(
+        "Mobile warning: loopback binds are not reachable from physical devices. Use --host 0.0.0.0 or a LAN IP.",
+        "yellow",
+      ),
+    );
+  }
+
+  lines.push(color("Waiting for React runtime clients...", "dim"));
+  lines.push(color("Hint: mobile clients cannot always reach localhost; choose the host for your runtime above.", "dim"));
+  return lines;
+}
+
+function formatNetworkLines(networkUrls: readonly string[]): string[] {
+  if (networkUrls.length === 0) {
+    return [`${color("Network:", "cyan")}   ${color("(no LAN IPv4 address detected)", "dim")}`];
+  }
+
+  return networkUrls.map((url, index) => {
+    const label = index === 0 ? `${color("Network:", "cyan")}   ` : "           ";
+    return `${label}${url}`;
+  });
+}
+
+function getNetworkUrls(port: number, bindHost: string): string[] {
+  const networkHosts = isWildcardHost(bindHost)
+    ? getLanIPv4Addresses()
+    : isLoopbackHost(bindHost)
+      ? []
+      : [bindHost];
+
+  return networkHosts.map((host) => formatWebSocketUrl(host, port));
+}
+
+function getLanIPv4Addresses(): string[] {
+  const addresses = new Set<string>();
+
+  for (const networkInterface of Object.values(networkInterfaces())) {
+    for (const address of networkInterface ?? []) {
+      if (address.family === "IPv4" && !address.internal) {
+        addresses.add(address.address);
+      }
+    }
+  }
+
+  return Array.from(addresses);
+}
+
+function formatWebSocketUrl(host: string, port: number): string {
+  const formattedHost = host.includes(":") && !host.startsWith("[")
+    ? `[${host}]`
+    : host;
+
+  return `ws://${formattedHost}:${port}`;
+}
+
+function isWildcardHost(host: string): boolean {
+  return host === "0.0.0.0" || host === "::";
+}
+
+function isLoopbackHost(host: string): boolean {
+  return host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]";
 }
 
 function printConnectionOpened(session: ClientSession, activeClients: number): void {
@@ -693,6 +790,7 @@ function printUsage(): void {
   writeLine(`Usage: react-log-agent [start] [options]
 
 Options:
+  --host <host>                   WebSocket bind host (default: ${DEFAULT_HOST})
   --port <number>                 WebSocket port (default: ${DEFAULT_PORT})
   --profile <network|routes|errors|all>
                                   Capture profile (default: ${DEFAULT_PROFILE})

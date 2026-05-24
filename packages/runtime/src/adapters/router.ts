@@ -106,6 +106,16 @@ function installBrowserHistoryListener(emitTransition: (nextPath: string) => voi
     return () => undefined;
   }
 
+  if (
+    !window.history ||
+    typeof window.history.pushState !== "function" ||
+    typeof window.history.replaceState !== "function" ||
+    typeof window.addEventListener !== "function" ||
+    typeof window.removeEventListener !== "function"
+  ) {
+    return () => undefined;
+  }
+
   const originalPushState = window.history.pushState;
   const originalReplaceState = window.history.replaceState;
 
@@ -167,7 +177,13 @@ function pathFromWindow(): string {
     return "/";
   }
 
-  return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const location = window.location;
+
+  if (!location) {
+    return "/";
+  }
+
+  return `${location.pathname ?? "/"}${location.search ?? ""}${location.hash ?? ""}`;
 }
 
 function createRouteContext(path: string, navigationId?: string): CurrentRouteContext {
