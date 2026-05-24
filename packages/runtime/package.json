@@ -1,6 +1,6 @@
 {
   "name": "@anilkrblt/runtime",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Browser runtime SDK for React Log Agent.",
   "type": "module",
   "license": "MIT",
