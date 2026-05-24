@@ -19,3 +19,13 @@
 - [x] Remove package-local lockfiles and `node_modules` folders.
 - [x] Regenerate root lockfile with a clean root install.
 - [x] Verify package typechecks/builds, app typecheck/build, workspace links, and CLI executable.
+
+# Root README Professionalization
+
+- [x] Add header, badges, and value proposition.
+- [x] Add architecture blueprint and inert-by-default lifecycle.
+- [x] Document installation and current CLI usage.
+- [x] Add runtime integration snippets for fetch, Axios, and router adapters.
+- [x] Showcase performance, privacy, route correlation, and adapter coverage.
+- [x] Add npm workspace development commands.
+- [x] Explain package layout and safety model.
